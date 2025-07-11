@@ -1,45 +1,51 @@
+<!-- login.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Majitrack | Resident Login</title>
+  <title>Login | Majitrack</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
   <div class="container">
-    <h2>🔐 Resident Login</h2>
+    <h2>🔐 User Login</h2>
     <form id="loginForm">
-      <input type="text" id="phoneNumber" placeholder="Phone Number" required />
+      <input type="text" id="userId" placeholder="User ID" required />
+      <input type="password" id="password" placeholder="Password" required />
       <button type="submit">Login</button>
     </form>
     <div id="loginMsg"></div>
   </div>
 
   <script>
-    const loginForm = document.getElementById('loginForm');
+    const form = document.getElementById('loginForm');
 
-    loginForm.addEventListener('submit', async (e) => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const phoneNumber = document.getElementById('phoneNumber').value;
+
+      const credentials = {
+        userId: document.getElementById('userId').value,
+        password: document.getElementById('password').value
+      };
 
       try {
         const res = await fetch('https://majitrack-backend.onrender.com/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ phoneNumber })
+          body: JSON.stringify(credentials)
         });
 
         const data = await res.json();
 
         if (res.ok && data.token) {
           localStorage.setItem('token', data.token);
+          localStorage.setItem('userId', credentials.userId);
           document.getElementById('loginMsg').innerText = '✅ Login successful!';
-          setTimeout(() => {
-            window.location.href = 'resident.html'; // Redirect to the report page
-          }, 1000);
+          setTimeout(() => window.location.href = 'resident.html', 1000); // or redirect based on role
         } else {
-          document.getElementById('loginMsg').innerText = '❌ Login failed. Check phone number.';
+          document.getElementById('loginMsg').innerText = data.message || '❌ Invalid credentials.';
         }
+
       } catch (err) {
         console.error(err);
         document.getElementById('loginMsg').innerText = '⚠️ Error logging in.';
@@ -48,3 +54,4 @@
   </script>
 </body>
 </html>
+

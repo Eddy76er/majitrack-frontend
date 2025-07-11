@@ -1,0 +1,62 @@
+<!-- signup.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sign Up | Majitrack</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="container">
+    <h2>📝 Create Account</h2>
+    <form id="signupForm">
+      <input type="text" id="name" placeholder="Full Name" required />
+      <input type="text" id="phoneNumber" placeholder="Phone Number" required />
+      <input type="password" id="password" placeholder="Password" required />
+      <select id="role" required>
+        <option value="">Select Role</option>
+        <option value="resident">Resident</option>
+        <option value="admin">Admin</option>
+      </select>
+      <button type="submit">Register</button>
+    </form>
+    <div id="signupMsg"></div>
+  </div>
+
+  <script>
+    const form = document.getElementById('signupForm');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const user = {
+        name: document.getElementById('name').value,
+        phoneNumber: document.getElementById('phoneNumber').value,
+        password: document.getElementById('password').value,
+        role: document.getElementById('role').value
+      };
+
+      try {
+        const res = await fetch('https://majitrack-backend.onrender.com/api/users/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(user)
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          document.getElementById('signupMsg').innerText = '✅ Signup successful! Redirecting...';
+          setTimeout(() => window.location.href = 'index.html', 1500);
+        } else {
+          document.getElementById('signupMsg').innerText = data.message || '❌ Signup failed.';
+        }
+
+      } catch (err) {
+        console.error(err);
+        document.getElementById('signupMsg').innerText = '⚠️ Error submitting form.';
+      }
+    });
+  </script>
+</body>
+</html>
