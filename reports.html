@@ -63,7 +63,7 @@
       background-color: #00b4d8;
       color: white;
       border: none;
-      padding: 5px 10px;
+      padding: 6px 12px;
       cursor: pointer;
       border-radius: 5px;
     }
@@ -105,8 +105,8 @@
   <table id="reportsTable">
     <thead>
       <tr>
-        <th>ID</th>
-        <th>User</th>
+        <th>User ID</th>
+        <th>Name</th>
         <th>Phone</th>
         <th>Location</th>
         <th>Status</th>
@@ -158,7 +158,7 @@
           .forEach(report => {
             const row = document.createElement('tr');
             row.innerHTML = `
-              <td>${report.report_id}</td>
+              <td>${report.user_id}</td>
               <td>${report.name}</td>
               <td>${report.phone_number}</td>
               <td>${report.location}</td>
@@ -173,7 +173,6 @@
       }
 
       function viewReport(report) {
-        // Save report to localStorage to prefill adminResponses.html
         localStorage.setItem('selectedReport', JSON.stringify(report));
         window.location.href = 'adminResponses.html';
       }
@@ -183,7 +182,6 @@
         document.getElementById(id).addEventListener('input', fetchReports);
       });
 
-      // Load initial report list
       fetchReports();
     });
   </script>
