@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Resolve Report | Majitrack</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f2f6fc;
+      padding: 2rem;
+    }
+
+    h2 {
+      text-align: center;
+      color: #023e8a;
+    }
+
+    .form-container {
+      max-width: 500px;
+      background: white;
+      padding: 1.5rem;
+      margin: 2rem auto;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    label {
+      display: block;
+      margin-top: 1rem;
+      font-weight: 600;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 0.3rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      margin-top: 1.5rem;
+      width: 100%;
+      background-color: #0077b6;
+      color: white;
+      padding: 0.8rem;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background-color: #0096c7;
+    }
+
+    .back-btn {
+      margin-top: 1rem;
+      display: block;
+      text-align: center;
+      background-color: #6c757d;
+      color: white;
+      padding: 0.6rem 1.2rem;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .back-btn:hover {
+      background-color: #495057;
+    }
+
+    .status-message {
+      margin-top: 1rem;
+      text-align: center;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h2>🛠️ Resolve Report</h2>
+
+  <div class="form-container">
+    <form id="responseForm">
+      <label>Report ID</label>
+      <input type="text" id="reportId" readonly>
+
+      <label>User ID</label>
+      <input type="text" id="userId" readonly>
+
+      <label>Water Source ID</label>
+      <input type="text" id="waterSourceId" readonly>
+
+      <label>Water Source Type</label>
+      <input type="text" id="waterSourceType" readonly>
+
+      <label>Comments</label>
+      <textarea id="comments" rows="4" required></textarea>
+
+      <label>Status</label>
+      <select id="status" required>
+        <option value="resolved">Resolved</option>
+      </select>
+
+      <button type="submit">Submit Response</button>
+    </form>
+
+    <div class="status-message" id="responseMsg"></div>
+
+    <button class="back-btn" onclick="window.location.href='reports.html'">
+      ⬅ Back to Reports
+    </button>
+  </div>
+
+  <script>
+    const form = document.getElementById('responseForm');
+    const token = localStorage.getItem('token');
+    const selectedReport = JSON.parse(localStorage.getItem('selectedReport'));
+
+    // Prefill fields
+    document.getElementById('reportId').value = selectedReport.report_id;
+    document.getElementById('userId').value = selectedReport.user_id;
+    document.getElementById('waterSourceId').value = selectedReport.water_source_id || 'N/A';
+    document.getElementById('waterSourceType').value = selectedReport.water_source_type || 'N/A';
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const responseData = {
+        report_id: selectedReport.report_id,
+        user_id: selectedReport.user_id,
+        water_source_id: selectedReport.water_source_id || null,
+        water_source_type: selectedReport.water_source_type || '',
+        comments: document.getElementById('comments').value,
+        status: document.getElementById('status').value,
+        date_sent: new Date().toISOString()
+      };
+
+      try {
+        const res = await fetch('https://majitrack-backend.onrender.com/api/admin/respond', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify(responseData)
+        });
+
+        const result = await res.json();
+
+        if (res.ok) {
+          document.getElementById('responseMsg').innerText = '✅ Response submitted successfully.';
+          form.reset();
+        } else {
+          document.getElementById('responseMsg').innerText = result.message || '❌ Failed to submit.';
+        }
+      } catch (err) {
+        console.error('Submit failed:', err);
+        document.getElementById('responseMsg').innerText = '⚠️ Error submitting response.';
+      }
+    });
+  </script>
+</body>
+</html>
