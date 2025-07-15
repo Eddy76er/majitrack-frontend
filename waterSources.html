@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Add Water Source | Majitrack</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f2f6fc;
+      padding: 2rem;
+    }
+
+    h2 {
+      text-align: center;
+      color: #023e8a;
+    }
+
+    .form-container {
+      max-width: 500px;
+      background: white;
+      padding: 1.5rem;
+      margin: 2rem auto;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    label {
+      display: block;
+      margin-top: 1rem;
+      font-weight: 600;
+    }
+
+    select, input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 0.3rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      margin-top: 1.5rem;
+      width: 100%;
+      background-color: #0077b6;
+      color: white;
+      padding: 0.8rem;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background-color: #0096c7;
+    }
+
+    .link-btn {
+      display: block;
+      margin-top: 1rem;
+      background-color: #6c757d;
+      color: white;
+      padding: 0.6rem;
+      text-align: center;
+      text-decoration: none;
+      border-radius: 5px;
+    }
+
+    .link-btn:hover {
+      background-color: #495057;
+    }
+
+    #statusMsg {
+      text-align: center;
+      margin-top: 1rem;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h2>💧 Add Water Source</h2>
+
+  <div class="form-container">
+    <form id="sourceForm">
+      <label>Water Source Type</label>
+      <select id="sourceType" required>
+        <option value="">-- Select Type --</option>
+        <option value="Borehole">Borehole</option>
+        <option value="Water Kiosk">Water Kiosk</option>
+        <option value="Well">Well</option>
+      </select>
+
+      <label>Location</label>
+      <input type="text" id="location" placeholder="e.g. Village A or GPS coordinates" required />
+
+      <button type="submit">Add Water Source</button>
+    </form>
+
+    <div id="statusMsg"></div>
+
+    <a href="viewWaterSources.html" class="link-btn">
+      <i class="fas fa-eye"></i> View Water Sources
+    </a>
+  </div>
+
+  <script>
+    const form = document.getElementById('sourceForm');
+    const token = localStorage.getItem('token');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const data = {
+        type: document.getElementById('sourceType').value,
+        location: document.getElementById('location').value
+      };
+
+      try {
+        const res = await fetch('https://majitrack-backend.onrender.com/api/water-sources', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify(data)
+        });
+
+        const result = await res.json();
+
+        if (res.ok) {
+          document.getElementById('statusMsg').innerText = '✅ Water source added!';
+          form.reset();
+        } else {
+          document.getElementById('statusMsg').innerText = result.message || '❌ Failed to add source.';
+        }
+      } catch (err) {
+        console.error('Add source error:', err);
+        document.getElementById('statusMsg').innerText = '⚠️ Network error.';
+      }
+    });
+  </script>
+</body>
+</html>
