@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Reports | Majitrack</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f2f6fc;
+      margin: 0;
+      padding: 1rem;
+    }
+
+    h2 {
+      text-align: center;
+      color: #023e8a;
+    }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+
+    .filters input,
+    .filters select {
+      padding: 0.5rem;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      min-width: 200px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: #fff;
+      margin-top: 1rem;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+
+    th {
+      background-color: #0077b6;
+      color: #fff;
+    }
+
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+
+    button.view-btn {
+      background-color: #00b4d8;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    button.view-btn:hover {
+      background-color: #0096c7;
+    }
+
+    .back-btn {
+      display: block;
+      margin: 1rem auto;
+      text-align: center;
+      background-color: #6c757d;
+      color: white;
+      padding: 0.6rem 1.2rem;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .back-btn:hover {
+      background-color: #495057;
+    }
+  </style>
+</head>
+<body>
+  <h2>📄 Submitted Reports</h2>
+
+  <div class="filters">
+    <input type="date" id="filterDate" />
+    <select id="filterStatus">
+      <option value="">All Statuses</option>
+      <option value="pending">Pending</option>
+      <option value="resolved">Resolved</option>
+    </select>
+    <input type="text" id="filterLocation" placeholder="Filter by Location" />
+  </div>
+
+  <table id="reportsTable">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>User</th>
+        <th>Phone</th>
+        <th>Location</th>
+        <th>Status</th>
+        <th>Date</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Reports will be populated here -->
+    </tbody>
+  </table>
+
+  <button class="back-btn" onclick="window.location.href='admin.html'">
+    ⬅ Back to Admin Dashboard
+  </button>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const token = localStorage.getItem('token');
+      const tableBody = document.querySelector('#reportsTable tbody');
+
+      async function fetchReports() {
+        try {
+          const res = await fetch('https://majitrack-backend.onrender.com/api/reports', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+
+          const reports = await res.json();
+          displayReports(reports);
+        } catch (err) {
+          console.error('Failed to fetch reports:', err);
+        }
+      }
+
+      function displayReports(reports) {
+        const filterDate = document.getElementById('filterDate').value;
+        const filterStatus = document.getElementById('filterStatus').value;
+        const filterLocation = document.getElementById('filterLocation').value.toLowerCase();
+
+        tableBody.innerHTML = '';
+
+        reports
+          .filter(r => {
+            const dateMatch = !filterDate || r.date_created?.startsWith(filterDate);
+            const statusMatch = !filterStatus || r.status === filterStatus;
+            const locationMatch = !filterLocation || r.location.toLowerCase().includes(filterLocation);
+            return dateMatch && statusMatch && locationMatch;
+          })
+          .forEach(report => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${report.report_id}</td>
+              <td>${report.name}</td>
+              <td>${report.phone_number}</td>
+              <td>${report.location}</td>
+              <td>${report.status}</td>
+              <td>${new Date(report.date_created).toLocaleDateString()}</td>
+              <td>
+                <button class="view-btn" onclick='viewReport(${JSON.stringify(report)})'>View</button>
+              </td>
+            `;
+            tableBody.appendChild(row);
+          });
+      }
+
+      function viewReport(report) {
+        // Save report to localStorage to prefill adminResponses.html
+        localStorage.setItem('selectedReport', JSON.stringify(report));
+        window.location.href = 'adminResponses.html';
+      }
+
+      // Attach filter listeners
+      ['filterDate', 'filterStatus', 'filterLocation'].forEach(id => {
+        document.getElementById(id).addEventListener('input', fetchReports);
+      });
+
+      // Load initial report list
+      fetchReports();
+    });
+  </script>
+</body>
+</html>
