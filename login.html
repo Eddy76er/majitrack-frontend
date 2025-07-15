@@ -16,45 +16,50 @@
     </form>
     <div id="loginMsg"></div>
   </div>
+<script>
+  const form = document.getElementById('loginForm');
 
-  <script>
-    const form = document.getElementById('loginForm');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
+    const credentials = {
+      phoneNumber: document.getElementById('phoneNumber').value,
+      password: document.getElementById('password').value
+    };
 
-      const credentials = {
-        phoneNumber: document.getElementById('phoneNumber').value,
-        password: document.getElementById('password').value
-      };
+    try {
+      const res = await fetch('https://majitrack-backend.onrender.com/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(credentials)
+      });
 
-      try {
-        const res = await fetch('https://majitrack-backend.onrender.com/api/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(credentials)
-        });
+      const data = await res.json();
 
-        const data = await res.json();
+      if (res.ok && data.token) {
+        // ✅ Store user info and token
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('userId', data.user.id);
+        localStorage.setItem('userRole', data.user.role);
+        localStorage.setItem('userName', data.user.name);
 
-        if (res.ok && data.token) {
-          localStorage.setItem('token', data.token);
-          localStorage.setItem('userId', data.user.id);
-          localStorage.setItem('userRole', data.user.role);
-          localStorage.setItem('userName', data.user.name);
-
-          document.getElementById('loginMsg').innerText = '✅ Login successful!';
-          setTimeout(() => window.location.href = 'resident.html', 1000); // You can redirect based on role
+        // ✅ Redirect based on user role
+        if (data.user.role === 'admin') {
+          window.location.href = 'admin.html';
         } else {
-          document.getElementById('loginMsg').innerText = data.message || '❌ Invalid credentials.';
+          window.location.href = 'resident.html';
         }
-
-      } catch (err) {
-        console.error(err);
-        document.getElementById('loginMsg').innerText = '⚠️ Error logging in.';
+      } else {
+        document.getElementById('loginMsg').innerText = data.message || '❌ Invalid credentials.';
       }
-    });
-  </script>
+
+    } catch (err) {
+      console.error(err);
+      document.getElementById('loginMsg').innerText = '⚠️ Error logging in.';
+    }
+  });
+</script>
+
 </body>
 </html>
 
