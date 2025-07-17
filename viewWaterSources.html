@@ -1,16 +1,15 @@
-<!-- viewWaterSources.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>View Water Sources | Majitrack</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <link rel="stylesheet" href="css/style.css" />
+  <title>View Water Sources | Majitrack Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #eef2f7;
+      font-family: 'Poppins', sans-serif;
+      background-color: #f2f6fc;
       padding: 2rem;
     }
 
@@ -20,30 +19,35 @@
     }
 
     .filters {
+      max-width: 800px;
+      margin: 1rem auto;
       display: flex;
+      flex-wrap: wrap;
       gap: 1rem;
       justify-content: center;
-      margin-bottom: 1.5rem;
-      flex-wrap: wrap;
     }
 
-    select {
-      padding: 0.6rem;
+    select, input {
+      padding: 0.5rem;
       border-radius: 5px;
       border: 1px solid #ccc;
     }
 
     table {
       width: 100%;
+      max-width: 1000px;
+      margin: 1rem auto;
       border-collapse: collapse;
-      background-color: #fff;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
 
     th, td {
-      padding: 1rem;
-      border: 1px solid #ddd;
-      text-align: center;
+      padding: 0.75rem;
+      border-bottom: 1px solid #eee;
+      text-align: left;
     }
 
     th {
@@ -51,166 +55,152 @@
       color: white;
     }
 
-    td button {
-      background-color: #dc3545;
-      color: white;
+    .actions button {
+      margin-right: 0.5rem;
+      padding: 5px 10px;
       border: none;
-      padding: 0.5rem 1rem;
       border-radius: 4px;
       cursor: pointer;
     }
 
-    td button:hover {
-      background-color: #c82333;
+    .edit-btn {
+      background-color: #ffc107;
+      color: black;
     }
 
-    .back-link {
+    .delete-btn {
+      background-color: #dc3545;
+      color: white;
+    }
+
+    .back-btn {
       display: block;
+      margin: 2rem auto;
+      width: 200px;
       text-align: center;
-      margin-top: 2rem;
-      color: #0077b6;
+      background-color: #6c757d;
+      color: white;
+      padding: 0.7rem;
+      border-radius: 5px;
       text-decoration: none;
-      font-weight: bold;
     }
 
-    .back-link:hover {
-      text-decoration: underline;
-    }
-
-    #noResults {
-      text-align: center;
-      margin-top: 2rem;
-      color: #555;
-      font-weight: bold;
+    .back-btn:hover {
+      background-color: #495057;
     }
   </style>
 </head>
 <body>
-  <h2>📋 Water Sources List</h2>
+  <h2>📋 Water Sources</h2>
 
   <div class="filters">
-    <select id="typeFilter">
+    <select id="filterType">
       <option value="">-- Filter by Type --</option>
-      <option value="Borehole">borehole</option>
-      <option value="Water Kiosk">water kiosk</option>
-      <option value="Well">well</option>
+      <option value="Borehole">Borehole</option>
+      <option value="Water Kiosk">Water Kiosk</option>
+      <option value="Well">Well</option>
     </select>
 
-    <select id="locationFilter">
-      <option value="">-- Filter by Location --</option>
-    </select>
+    <input type="text" id="filterLocation" placeholder="Filter by Location..." />
   </div>
 
-  <table id="sourceTable">
+  <table id="sourcesTable">
     <thead>
       <tr>
-        <th>Water Source Type</th>
+        <th>ID</th>
+        <th>Type</th>
         <th>Location</th>
-        <th>Action</th>
+        <th>Actions</th>
       </tr>
     </thead>
-    <tbody id="tableBody"></tbody>
+    <tbody></tbody>
   </table>
 
-  <p id="noResults" style="display: none;">No results found.</p>
-
-  <a href="admin.html" class="back-link">
-    <i class="fas fa-arrow-left"></i> Back to Dashboard
-  </a>
+  <a href="admin.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
 
   <script>
     const token = localStorage.getItem('token');
-    let waterSources = [];
+    const tableBody = document.querySelector('#sourcesTable tbody');
+    const filterType = document.getElementById('filterType');
+    const filterLocation = document.getElementById('filterLocation');
+    let sources = [];
 
     async function fetchWaterSources() {
       try {
         const res = await fetch('https://majitrack-backend.onrender.com/api/water-sources', {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+          headers: { Authorization: `Bearer ${token}` }
         });
-        const data = await res.json();
-        waterSources = data;
-        populateLocationFilter(data);
-        renderTable(data);
-      } catch (error) {
-        console.error('Error fetching sources:', error);
+        sources = await res.json();
+        renderTable(sources);
+      } catch (err) {
+        console.error('Error fetching sources:', err);
       }
     }
 
-    function populateLocationFilter(data) {
-      const uniqueLocations = [...new Set(data.map(source => source.location))];
-      const locationFilter = document.getElementById('locationFilter');
-      locationFilter.innerHTML = '<option value="">-- Filter by Location --</option>';
-      uniqueLocations.forEach(loc => {
-        const option = document.createElement('option');
-        option.value = loc;
-        option.textContent = loc;
-        locationFilter.appendChild(option);
-      });
-    }
-
-    function renderTable(sources) {
-      const tableBody = document.getElementById('tableBody');
-      const noResults = document.getElementById('noResults');
+    function renderTable(data) {
       tableBody.innerHTML = '';
 
-      if (sources.length === 0) {
-        noResults.style.display = 'block';
+      const filterTypeValue = filterType.value.toLowerCase();
+      const filterLocationValue = filterLocation.value.toLowerCase();
+
+      const filtered = data.filter(source => {
+        const sourceType = (source.water_source_type || '').toLowerCase();
+        const sourceLocation = (source.location || '').toLowerCase();
+
+        const typeMatch = !filterTypeValue || sourceType === filterTypeValue;
+        const locationMatch = !filterLocationValue || sourceLocation.includes(filterLocationValue);
+        
+        return typeMatch && locationMatch;
+      });
+
+      if (filtered.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="4">No water sources found.</td></tr>';
         return;
       }
 
-      noResults.style.display = 'none';
-
-      sources.forEach(source => {
+      filtered.forEach(source => {
         const row = document.createElement('tr');
         row.innerHTML = `
+          <td>${source.water_source_id}</td>
           <td>${source.water_source_type}</td>
           <td>${source.location}</td>
-          <td><button onclick="deleteSource(${source.water_source_id})">Delete</button></td>
+          <td class="actions">
+            <button class="edit-btn" onclick="editSource(${source.water_source_id})"><i class="fas fa-edit"></i></button>
+            <button class="delete-btn" onclick="deleteSource(${source.water_source_id})"><i class="fas fa-trash"></i></button>
+          </td>
         `;
         tableBody.appendChild(row);
       });
     }
 
     async function deleteSource(id) {
-      if (!confirm('Are you sure you want to delete this source?')) return;
+      if (!confirm('Are you sure you want to delete this water source?')) return;
 
       try {
         const res = await fetch(`https://majitrack-backend.onrender.com/api/water-sources/${id}`, {
           method: 'DELETE',
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+          headers: { Authorization: `Bearer ${token}` }
         });
 
         if (res.ok) {
-          waterSources = waterSources.filter(source => source.water_source_id !== id);
-          renderTable(waterSources);
+          sources = sources.filter(s => s.water_source_id !== id);
+          renderTable(sources);
+          alert('✅ Water source deleted!');
         } else {
-          alert('Failed to delete source.');
+          alert('❌ Failed to delete.');
         }
-      } catch (error) {
-        console.error('Delete error:', error);
+      } catch (err) {
+        console.error('Delete error:', err);
+        alert('⚠️ Network error.');
       }
     }
 
-    document.getElementById('typeFilter').addEventListener('change', applyFilters);
-    document.getElementById('locationFilter').addEventListener('change', applyFilters);
-
-    function applyFilters() {
-      const selectedType = document.getElementById('typeFilter').value;
-      const selectedLocation = document.getElementById('locationFilter').value;
-
-      const filtered = waterSources.filter(source => {
-        return (
-          (selectedType === '' || source.water_source_type === selectedType) &&
-          (selectedLocation === '' || source.location === selectedLocation)
-        );
-      });
-
-      renderTable(filtered);
+    function editSource(id) {
+      alert('🔧 Edit functionality will be implemented later.');
     }
+
+    filterType.addEventListener('change', () => renderTable(sources));
+    filterLocation.addEventListener('input', () => renderTable(sources));
 
     fetchWaterSources();
   </script>
