@@ -2,188 +2,228 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Admin Reports | Majitrack</title>
-  <link rel="stylesheet" href="css/style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
     body {
-      font-family: 'Poppins', sans-serif;
+      font-family: 'Segoe UI', sans-serif;
       background-color: #f2f6fc;
-      margin: 0;
-      padding: 1rem;
+      padding: 2rem;
     }
 
     h2 {
       text-align: center;
-      color: #023e8a;
-    }
-
-    .filters {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-      justify-content: center;
       margin-bottom: 1rem;
-    }
-
-    .filters input,
-    .filters select {
-      padding: 0.5rem;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      min-width: 200px;
+      color: #023e8a;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      background-color: #fff;
-      margin-top: 1rem;
-      border-radius: 8px;
+      background-color: white;
+      border-radius: 10px;
       overflow: hidden;
     }
 
     th, td {
-      padding: 12px 15px;
+      padding: 0.8rem;
+      border-bottom: 1px solid #ddd;
       text-align: left;
-      border-bottom: 1px solid #eee;
     }
 
     th {
       background-color: #0077b6;
-      color: #fff;
+      color: white;
     }
 
     tr:hover {
       background-color: #f1f1f1;
     }
 
-    button.view-btn {
-      background-color: #00b4d8;
+    .view-btn {
+      background-color: #2196F3;
       color: white;
-      border: none;
       padding: 6px 12px;
+      border: none;
+      border-radius: 4px;
       cursor: pointer;
-      border-radius: 5px;
     }
 
-    button.view-btn:hover {
-      background-color: #0096c7;
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 100;
+      padding-top: 60px;
+      left: 0; top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.4);
     }
 
-    .back-btn {
-      display: block;
-      margin: 1rem auto;
-      text-align: center;
-      background-color: #6c757d;
+    .modal-content {
+      background-color: #fff;
+      margin: auto;
+      padding: 20px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 600px;
+    }
+
+    .close {
+      float: right;
+      font-size: 24px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .resolve-btn {
+      margin-top: 1rem;
+      background-color: #28a745;
       color: white;
-      padding: 0.6rem 1.2rem;
+      padding: 10px 15px;
       border: none;
       border-radius: 5px;
       cursor: pointer;
     }
 
-    .back-btn:hover {
-      background-color: #495057;
+    .resolve-btn:hover {
+      background-color: #218838;
+    }
+
+    .filter-container {
+      margin: 1rem 0;
+      text-align: right;
+    }
+
+    select {
+      padding: 8px;
+      margin-left: 1rem;
     }
   </style>
 </head>
 <body>
-  <h2>📄 Submitted Reports</h2>
+  <h2>📋 Reports from Residents</h2>
 
-  <div class="filters">
-    <input type="date" id="filterDate" />
-    <select id="filterStatus">
-      <option value="">All Statuses</option>
+  <div class="filter-container">
+    <label for="statusFilter">Filter by Status:</label>
+    <select id="statusFilter">
+      <option value="">All</option>
       <option value="pending">Pending</option>
       <option value="resolved">Resolved</option>
     </select>
-    <input type="text" id="filterLocation" placeholder="Filter by Location" />
   </div>
 
-  <table id="reportsTable">
+  <table>
     <thead>
       <tr>
         <th>User ID</th>
         <th>Name</th>
-        <th>Phone</th>
         <th>Location</th>
+        <th>Type</th>
         <th>Status</th>
         <th>Date</th>
         <th>Action</th>
       </tr>
     </thead>
-    <tbody>
-      <!-- Reports will be populated here -->
+    <tbody id="reportTableBody">
+      <!-- Dynamic rows -->
     </tbody>
   </table>
 
-  <button class="back-btn" onclick="window.location.href='admin.html'">
-    ⬅ Back to Admin Dashboard
-  </button>
+  <!-- Modal -->
+  <div id="reportModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <h3>📝 Report Details</h3>
+      <div id="reportDetails"></div>
+      <button class="resolve-btn" id="resolveBtn">Resolve</button>
+    </div>
+  </div>
 
   <script>
-    document.addEventListener('DOMContentLoaded', async () => {
-      const token = localStorage.getItem('token');
-      const tableBody = document.querySelector('#reportsTable tbody');
+    const token = localStorage.getItem('token');
+    const userId = localStorage.getItem('userId');
+    const tableBody = document.getElementById('reportTableBody');
+    const statusFilter = document.getElementById('statusFilter');
+    let allReports = [];
 
-      async function fetchReports() {
-        try {
-          const res = await fetch('https://majitrack-backend.onrender.com/api/reports', {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-
-          const reports = await res.json();
-          displayReports(reports);
-        } catch (err) {
-          console.error('Failed to fetch reports:', err);
-        }
+    const fetchReports = async () => {
+      try {
+        const res = await fetch('https://majitrack-backend.onrender.com/api/reports', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        const data = await res.json();
+        allReports = data;
+        displayReports(allReports);
+      } catch (err) {
+        console.error('Error fetching reports:', err);
       }
+    };
 
-      function displayReports(reports) {
-        const filterDate = document.getElementById('filterDate').value;
-        const filterStatus = document.getElementById('filterStatus').value;
-        const filterLocation = document.getElementById('filterLocation').value.toLowerCase();
-
-        tableBody.innerHTML = '';
-
-        reports
-          .filter(r => {
-            const dateMatch = !filterDate || r.date_created?.startsWith(filterDate);
-            const statusMatch = !filterStatus || r.status === filterStatus;
-            const locationMatch = !filterLocation || r.location.toLowerCase().includes(filterLocation);
-            return dateMatch && statusMatch && locationMatch;
-          })
-          .forEach(report => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-              <td>${report.user_id}</td>
-              <td>${report.name}</td>
-              <td>${report.phone_number}</td>
-              <td>${report.location}</td>
-              <td>${report.status}</td>
-              <td>${new Date(report.date_created).toLocaleDateString()}</td>
-              <td>
-                <button class="view-btn" onclick='viewReport(${JSON.stringify(report)})'>View</button>
-              </td>
-            `;
-            tableBody.appendChild(row);
-          });
-      }
-
-      function viewReport(report) {
-        localStorage.setItem('selectedReport', JSON.stringify(report));
-        window.location.href = 'adminResponses.html';
-      }
-
-      // Attach filter listeners
-      ['filterDate', 'filterStatus', 'filterLocation'].forEach(id => {
-        document.getElementById(id).addEventListener('input', fetchReports);
+    const displayReports = (reports) => {
+      tableBody.innerHTML = '';
+      reports.forEach(report => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${report.user_id}</td>
+          <td>${report.name || 'N/A'}</td>
+          <td>${report.location}</td>
+          <td>${report.water_source_type}</td>
+          <td>${report.status}</td>
+          <td>${new Date(report.date_created).toLocaleDateString()}</td>
+          <td><button class="view-btn" onclick='showModal(${JSON.stringify(report)})'>View</button></td>
+        `;
+        tableBody.appendChild(row);
       });
+    };
 
-      fetchReports();
+    const showModal = (report) => {
+      const modal = document.getElementById('reportModal');
+      const details = document.getElementById('reportDetails');
+      const resolveBtn = document.getElementById('resolveBtn');
+
+      details.innerHTML = `
+        <p><strong>User ID:</strong> ${report.user_id}</p>
+        <p><strong>Name:</strong> ${report.name || 'N/A'}</p>
+        <p><strong>Location:</strong> ${report.location}</p>
+        <p><strong>Type:</strong> ${report.water_source_type}</p>
+        <p><strong>Description:</strong> ${report.description}</p>
+        <p><strong>Status:</strong> ${report.status}</p>
+        <p><strong>Date:</strong> ${new Date(report.date_created).toLocaleString()}</p>
+        ${report.image_path ? `<img src="https://majitrack-backend.onrender.com/${report.image_path}" alt="Issue Image" style="max-width: 100%; margin-top: 1rem;" />` : ''}
+      `;
+
+      resolveBtn.onclick = () => {
+        window.location.href = `adminResponses.html?reportId=${report.report_id}`;
+      };
+
+      modal.style.display = 'block';
+    };
+
+    const closeModal = () => {
+      document.getElementById('reportModal').style.display = 'none';
+    };
+
+    statusFilter.addEventListener('change', () => {
+      const filtered = statusFilter.value
+        ? allReports.filter(r => r.status === statusFilter.value)
+        : allReports;
+      displayReports(filtered);
     });
+
+    window.onclick = (event) => {
+      const modal = document.getElementById('reportModal');
+      if (event.target === modal) {
+        modal.style.display = 'none';
+      }
+    };
+
+    fetchReports();
   </script>
 </body>
 </html>
