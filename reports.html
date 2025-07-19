@@ -1,3 +1,4 @@
+<!-- reports.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -80,12 +81,6 @@
       width: 80%;
       max-width: 700px;
       box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-      animation: modalopen 0.4s;
-    }
-
-    @keyframes modalopen {
-      from {opacity: 0; transform: translateY(-50px);}
-      to {opacity: 1; transform: translateY(0);}
     }
 
     .close {
@@ -110,7 +105,6 @@
       border-radius: 5px;
       cursor: pointer;
       font-size: 16px;
-      transition: all 0.3s;
       display: block;
       width: 100%;
     }
@@ -159,17 +153,7 @@
     #reportDetails strong {
       color: #0077b6;
       display: inline-block;
-      width: 120px;
-    }
-
-    .report-image {
-      max-width: 100%;
-      height: auto;
-      border-radius: 8px;
-      margin-top: 15px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      border: 1px solid #eee;
-      display: none; /* Hidden by default */
+      width: 150px;
     }
 
     .view-image-btn {
@@ -179,22 +163,13 @@
       border: none;
       border-radius: 4px;
       cursor: pointer;
-      margin-left: 10px;
-      transition: all 0.3s;
+      margin-top: 10px;
+      display: inline-block;
+      text-decoration: none;
     }
 
     .view-image-btn:hover {
       background-color: #3e8e41;
-    }
-
-    .modal-header {
-      border-bottom: 1px solid #eee;
-      padding-bottom: 15px;
-      margin-bottom: 15px;
-    }
-
-    .image-container {
-      margin-top: 15px;
     }
 
     @media (max-width: 768px) {
@@ -239,39 +214,32 @@
         <th>User ID</th>
         <th>Name</th>
         <th>Location</th>
-        <th>Type</th>
+        <th>Water Source Type</th>
         <th>Status</th>
         <th>Date</th>
         <th>Action</th>
       </tr>
     </thead>
-    <tbody id="reportTableBody">
-      <!-- Dynamic rows -->
-    </tbody>
+    <tbody id="reportTableBody"></tbody>
   </table>
 
   <!-- Modal -->
   <div id="reportModal" class="modal">
     <div class="modal-content">
       <span class="close" onclick="closeModal()">&times;</span>
-      <div class="modal-header">
-        <h3>📝 Report Details</h3>
-      </div>
+      <h3>📝 Report Details</h3>
       <div id="reportDetails"></div>
-      <div class="image-container" id="imageContainer"></div>
       <button class="resolve-btn" id="resolveBtn">Resolve</button>
     </div>
   </div>
 
   <script>
     const token = localStorage.getItem('token');
-    const userId = localStorage.getItem('userId');
     const tableBody = document.getElementById('reportTableBody');
     const statusFilter = document.getElementById('statusFilter');
     const fromDateFilter = document.getElementById('fromDate');
     const toDateFilter = document.getElementById('toDate');
     let allReports = [];
-    let currentReportImage = null;
 
     const fetchReports = async () => {
       try {
@@ -308,34 +276,22 @@
     const showModal = (report) => {
       const modal = document.getElementById('reportModal');
       const details = document.getElementById('reportDetails');
-      const imageContainer = document.getElementById('imageContainer');
       const resolveBtn = document.getElementById('resolveBtn');
 
-      // Store the current report's image path
-      currentReportImage = report.image_path ? `https://majitrack-backend.onrender.com/${report.image_path}` : null;
+      const imageUrl = report.image_path ? `https://majitrack-backend.onrender.com/${report.image_path}` : null;
+      const viewImageBtn = imageUrl ? `<a class="view-image-btn" target="_blank" href="viewImage.html?src=${encodeURIComponent(imageUrl)}">View Full Image</a>` : 'No image';
 
       details.innerHTML = `
         <p><strong>User ID:</strong> ${report.user_id}</p>
         <p><strong>Name:</strong> ${report.name || 'N/A'}</p>
+        <p><strong>Phone Number:</strong> ${report.phone_number || 'N/A'}</p>
         <p><strong>Location:</strong> ${report.location}</p>
-        <p><strong>Type:</strong> ${report.water_source_type}</p>
+        <p><strong>Water Source Type:</strong> ${report.water_source_type}</p>
         <p><strong>Description:</strong> ${report.description}</p>
         <p><strong>Status:</strong> ${report.status}</p>
         <p><strong>Date:</strong> ${new Date(report.date_created).toLocaleString()}</p>
-        <p><strong>Image:</strong> ${report.image_path ? 
-          `<button class="view-image-btn" onclick="toggleImage()">View Image</button>` : 
-          'No image available'}</p>
+        <p><strong>Image:</strong> ${viewImageBtn}</p>
       `;
-
-      // Clear previous image
-      imageContainer.innerHTML = '';
-      
-      // Add image to container (hidden by default)
-      if (currentReportImage) {
-        imageContainer.innerHTML = `
-          <img src="${currentReportImage}" alt="Issue Image" class="report-image" id="reportImage" />
-        `;
-      }
 
       resolveBtn.onclick = () => {
         window.location.href = `adminResponses.html?reportId=${report.report_id}`;
@@ -344,56 +300,42 @@
       modal.style.display = 'block';
     };
 
-    const toggleImage = () => {
-      const image = document.getElementById('reportImage');
-      if (image) {
-        image.style.display = image.style.display === 'none' ? 'block' : 'none';
-      }
-    };
-
     const closeModal = () => {
       document.getElementById('reportModal').style.display = 'none';
     };
 
     const filterReports = () => {
       let filtered = [...allReports];
-      
-      // Filter by status
+
       if (statusFilter.value) {
         filtered = filtered.filter(r => r.status === statusFilter.value);
       }
-      
-      // Filter by date range
+
       if (fromDateFilter.value) {
         const fromDate = new Date(fromDateFilter.value);
         filtered = filtered.filter(r => new Date(r.date_created) >= fromDate);
       }
-      
+
       if (toDateFilter.value) {
         const toDate = new Date(toDateFilter.value);
-        // Include the entire day by setting to end of day
         toDate.setHours(23, 59, 59, 999);
         filtered = filtered.filter(r => new Date(r.date_created) <= toDate);
       }
-      
+
       displayReports(filtered);
     };
 
-    // Event listeners for filters
     statusFilter.addEventListener('change', filterReports);
     fromDateFilter.addEventListener('change', filterReports);
     toDateFilter.addEventListener('change', filterReports);
 
     window.onclick = (event) => {
-      const modal = document.getElementById('reportModal');
-      if (event.target === modal) {
-        modal.style.display = 'none';
+      if (event.target === document.getElementById('reportModal')) {
+        closeModal();
       }
     };
 
-    // Initialize with today's date as default for "To" date
     toDateFilter.valueAsDate = new Date();
-    
     fetchReports();
   </script>
 </body>
