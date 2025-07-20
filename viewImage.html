@@ -2,666 +2,281 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Fixed Image Viewer | Majitrack</title>
+  <title>View Report Image | Majitrack</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    
     body {
-      background: linear-gradient(135deg, #1a1a2e, #16213e);
-      color: #fff;
-      min-height: 100vh;
+      margin: 0;
+      background-color: #000;
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 20px;
+      height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
-    
+
     .container {
-      max-width: 1200px;
-      width: 100%;
-      background: rgba(25, 25, 50, 0.8);
-      border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      max-width: 95%;
+      max-height: 95%;
+    }
+
+    .image-container {
       position: relative;
-      padding: 30px;
-    }
-    
-    header {
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
       align-items: center;
-      margin-bottom: 30px;
-      padding-bottom: 20px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      min-width: 300px;
+      min-height: 300px;
+      border: 4px solid #2c3e50;
+      border-radius: 10px;
+      background: #1a1a1a;
+      box-shadow: 0 0 20px rgba(255,255,255,0.3);
+      overflow: hidden;
     }
-    
-    h1 {
-      font-size: 2.2rem;
-      background: linear-gradient(90deg, #4cc9f0, #4361ee);
-      /* Fixed vendor prefix issue */
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-      color: transparent;
-      display: inline-block;
+
+    img {
+      max-width: 100%;
+      max-height: 80vh;
+      display: block;
     }
-    
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    
-    .logo-icon {
-      font-size: 2.5rem;
-      color: #4cc9f0;
-    }
-    
+
     .back-btn {
-      background: linear-gradient(135deg, #4361ee, #3a0ca3);
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: #3498db;
       color: white;
-      padding: 12px 25px;
+      padding: 10px 20px;
       text-decoration: none;
       border-radius: 50px;
       font-weight: bold;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
       display: flex;
       align-items: center;
-      gap: 10px;
-      box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
-      transition: all 0.3s ease;
+      gap: 8px;
+      z-index: 100;
     }
-    
+
     .back-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 6px 20px rgba(67, 97, 238, 0.5);
+      background: #2980b9;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 8px rgba(0,0,0,0.15);
     }
-    
+
     .back-btn:active {
       transform: translateY(0);
     }
-    
-    .content {
-      display: flex;
-      gap: 40px;
-      flex-wrap: wrap;
-    }
-    
-    .image-section {
-      flex: 1;
-      min-width: 300px;
-    }
-    
-    .info-section {
-      flex: 1;
-      min-width: 300px;
-      background: rgba(30, 30, 60, 0.7);
-      border-radius: 15px;
-      padding: 25px;
-    }
-    
-    .image-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: rgba(20, 20, 40, 0.7);
-      border-radius: 15px;
-      min-height: 400px;
-      position: relative;
-      overflow: hidden;
-      border: 2px dashed rgba(255, 255, 255, 0.1);
-    }
-    
-    .image-placeholder {
+
+    .error-message, .loading-message {
+      color: white;
+      font-size: 1.2rem;
       text-align: center;
-      padding: 30px;
+      padding: 20px;
       max-width: 80%;
     }
-    
-    .placeholder-icon {
-      font-size: 5rem;
-      color: #4361ee;
-      margin-bottom: 20px;
-    }
-    
-    .image-placeholder h2 {
-      margin-bottom: 15px;
-      font-size: 1.8rem;
-      color: #f72585;
-    }
-    
-    .image-placeholder p {
-      color: #a0a0c0;
-      line-height: 1.6;
-      margin-bottom: 20px;
-    }
-    
-    img {
-      max-width: 100%;
-      max-height: 70vh;
-      display: block;
-      border-radius: 10px;
-      box-shadow: 0 5px 25px rgba(0, 0, 0, 0.4);
-      transition: transform 0.3s ease;
-    }
-    
-    .error-details {
-      background: rgba(231, 76, 60, 0.2);
-      border-radius: 10px;
-      padding: 20px;
-      margin-top: 20px;
-      border-left: 4px solid #e74c3c;
-    }
-    
-    .error-details h3 {
-      color: #e74c3c;
-      margin-bottom: 15px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    
-    .error-details pre {
-      background: rgba(0, 0, 0, 0.3);
-      padding: 15px;
+
+    .error-message {
+      background: #e74c3c;
       border-radius: 8px;
-      overflow-x: auto;
-      color: #ff9f9f;
-      font-family: monospace;
-      white-space: pre-wrap;
+      padding: 15px 25px;
     }
-    
-    .info-section h2 {
-      font-size: 1.8rem;
-      margin-bottom: 25px;
-      color: #4cc9f0;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    
-    .info-box {
-      background: rgba(40, 40, 80, 0.5);
-      border-radius: 10px;
-      padding: 20px;
-      margin-bottom: 25px;
-    }
-    
-    .info-box h3 {
-      color: #f72585;
-      margin-bottom: 15px;
-      font-size: 1.2rem;
-    }
-    
-    .info-content {
+
+    .loading-message {
       display: flex;
       flex-direction: column;
-      gap: 12px;
-    }
-    
-    .info-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 8px 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    }
-    
-    .info-label {
-      color: #a0a0c0;
-      font-weight: 500;
-    }
-    
-    .info-value {
-      color: #fff;
-      font-weight: 600;
-      max-width: 60%;
-      text-align: right;
-      word-break: break-word;
-    }
-    
-    .status-indicator {
-      display: inline-flex;
       align-items: center;
-      gap: 8px;
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-weight: 600;
-    }
-    
-    .status-error {
-      background: rgba(231, 76, 60, 0.2);
-      color: #e74c3c;
-    }
-    
-    .status-warning {
-      background: rgba(241, 196, 15, 0.2);
-      color: #f1c40f;
-    }
-    
-    .status-success {
-      background: rgba(46, 204, 113, 0.2);
-      color: #2ecc71;
-    }
-    
-    .troubleshooting {
-      background: rgba(30, 30, 60, 0.7);
-      border-radius: 10px;
-      padding: 25px;
-      margin-top: 30px;
-    }
-    
-    .troubleshooting h2 {
-      color: #f1c40f;
-      margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    
-    .steps {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-    
-    .step {
-      display: flex;
       gap: 15px;
     }
-    
-    .step-number {
-      background: #4361ee;
-      color: white;
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-shrink: 0;
-      font-weight: bold;
-    }
-    
-    .step-content h3 {
-      margin-bottom: 8px;
-      color: #4cc9f0;
-    }
-    
-    .step-content p {
-      color: #c0c0e0;
-      line-height: 1.6;
-    }
-    
-    .loading {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 20px;
-    }
-    
+
     .spinner {
-      width: 60px;
-      height: 60px;
-      border: 5px solid rgba(76, 201, 240, 0.3);
-      border-top: 5px solid #4cc9f0;
+      border: 4px solid rgba(255, 255, 255, 0.3);
       border-radius: 50%;
+      border-top: 4px solid #3498db;
+      width: 40px;
+      height: 40px;
       animation: spin 1s linear infinite;
     }
-    
+
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
-    
-    .loading-text {
-      font-size: 1.2rem;
-      color: #4cc9f0;
+
+    .image-info {
+      color: #ecf0f1;
+      margin-top: 15px;
       text-align: center;
+      font-size: 0.9rem;
+      max-width: 90%;
+      word-break: break-all;
+      background: rgba(44, 62, 80, 0.7);
+      padding: 10px 15px;
+      border-radius: 8px;
     }
-    
+
+    .image-info a {
+      color: #3498db;
+      text-decoration: none;
+    }
+
+    .image-info a:hover {
+      text-decoration: underline;
+    }
+
     .controls {
       display: flex;
       gap: 15px;
       margin-top: 20px;
-      justify-content: center;
-      flex-wrap: wrap;
     }
-    
+
     .control-btn {
-      background: rgba(67, 97, 238, 0.2);
-      color: #fff;
+      background: #3498db;
+      color: white;
       border: none;
-      padding: 12px 20px;
-      border-radius: 8px;
+      padding: 8px 16px;
+      border-radius: 4px;
       cursor: pointer;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: all 0.3s ease;
-      border: 1px solid rgba(67, 97, 238, 0.5);
+      font-weight: bold;
+      transition: background 0.3s;
     }
-    
+
     .control-btn:hover {
-      background: rgba(67, 97, 238, 0.4);
-      transform: translateY(-2px);
+      background: #2980b9;
     }
-    
+
     .hidden {
       display: none;
-    }
-    
-    @media (max-width: 768px) {
-      .content {
-        flex-direction: column;
-      }
-      
-      header {
-        flex-direction: column;
-        gap: 20px;
-      }
-      
-      .back-btn {
-        width: 100%;
-        justify-content: center;
-      }
     }
   </style>
 </head>
 <body>
+  <a href="reports.html" class="back-btn">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M19 12H5M12 19l-7-7 7-7"/>
+    </svg>
+    Back to Reports
+  </a>
+  
   <div class="container">
-    <header>
-      <div class="logo">
-        <div class="logo-icon">
-          <i class="fas fa-images"></i>
-        </div>
-        <h1>Majitrack Image Viewer</h1>
-      </div>
-      <a href="reports.html" class="back-btn">
-        <i class="fas fa-arrow-left"></i>
-        Back to Reports
-      </a>
-    </header>
-    
-    <div class="content">
-      <div class="image-section">
-        <div class="image-container" id="imageContainer">
-          <div class="image-placeholder" id="placeholder">
-            <div class="placeholder-icon">
-              <i class="fas fa-image"></i>
-            </div>
-            <h2>Image Preview</h2>
-            <p>Your image will appear here once loaded. If you're seeing this message, the image is either loading or couldn't be displayed.</p>
-            
-            <div class="loading hidden" id="loading">
-              <div class="spinner"></div>
-              <p class="loading-text">Loading image from server...</p>
-            </div>
-          </div>
-          
-          <img id="reportImage" class="hidden" alt="Report Image">
-          
-          <div class="error-details hidden" id="errorDetails">
-            <h3><i class="fas fa-exclamation-triangle"></i> Failed to Load Image</h3>
-            <pre id="errorMessage">Error details will appear here</pre>
-          </div>
-        </div>
-        
-        <div class="controls">
-          <button class="control-btn" id="zoomIn">
-            <i class="fas fa-search-plus"></i> Zoom In
-          </button>
-          <button class="control-btn" id="zoomOut">
-            <i class="fas fa-search-minus"></i> Zoom Out
-          </button>
-          <button class="control-btn" id="resetZoom">
-            <i class="fas fa-expand-arrows-alt"></i> Reset Zoom
-          </button>
-          <button class="control-btn" id="rotateBtn">
-            <i class="fas fa-sync"></i> Rotate
-          </button>
-        </div>
+    <div class="image-container">
+      <div id="loading" class="loading-message">
+        <div class="spinner"></div>
+        <p>Loading image...</p>
       </div>
       
-      <div class="info-section">
-        <h2><i class="fas fa-info-circle"></i> Image Information</h2>
-        
-        <div class="info-box">
-          <h3>Connection Details</h3>
-          <div class="info-content">
-            <div class="info-row">
-              <span class="info-label">Image URL:</span>
-              <span class="info-value" id="imageUrl">N/A</span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">Status:</span>
-              <span class="info-value">
-                <span class="status-indicator status-error" id="statusIndicator">
-                  <i class="fas fa-times-circle"></i> Not Loaded
-                </span>
-              </span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">Domain:</span>
-              <span class="info-value" id="imageDomain">N/A</span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">Protocol:</span>
-              <span class="info-value" id="imageProtocol">N/A</span>
-            </div>
-          </div>
-        </div>
-        
-        <div class="info-box">
-          <h3>Technical Details</h3>
-          <div class="info-content">
-            <div class="info-row">
-              <span class="info-label">Resolution:</span>
-              <span class="info-value" id="imageResolution">N/A</span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">File Size:</span>
-              <span class="info-value" id="imageSize">N/A</span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">File Type:</span>
-              <span class="info-value" id="imageType">N/A</span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">Aspect Ratio:</span>
-              <span class="info-value" id="imageAspect">N/A</span>
-            </div>
-          </div>
-        </div>
-        
-        <div class="troubleshooting">
-          <h2><i class="fas fa-tools"></i> Troubleshooting</h2>
-          <div class="steps">
-            <div class="step">
-              <div class="step-number">1</div>
-              <div class="step-content">
-                <h3>Check the URL</h3>
-                <p>Verify that the image URL is correct and accessible. You can test it by opening the URL directly in your browser.</p>
-              </div>
-            </div>
-            <div class="step">
-              <div class="step-number">2</div>
-              <div class="step-content">
-                <h3>Server Availability</h3>
-                <p>Ensure the server hosting the image is online and responding to requests. The server might be temporarily down.</p>
-              </div>
-            </div>
-            <div class="step">
-              <div class="step-number">3</div>
-              <div class="step-content">
-                <h3>CORS Configuration</h3>
-                <p>The server might be blocking requests due to CORS policy. Check that the server includes proper CORS headers.</p>
-              </div>
-            </div>
-          </div>
-        </div>
+      <img id="reportImage" class="hidden" alt="Report Image">
+      
+      <div id="error" class="error-message hidden">
+        <p>⚠️ Image failed to load</p>
+        <p id="error-details" style="font-size: 0.9rem; margin-top: 10px;"></p>
       </div>
+    </div>
+    
+    <div id="imageInfo" class="image-info hidden">
+      <p>Image URL: <span id="imageUrl"></span></p>
+      <p>Resolution: <span id="imageResolution"></span></p>
+    </div>
+    
+    <div class="controls">
+      <button id="zoomIn" class="control-btn">Zoom In</button>
+      <button id="zoomOut" class="control-btn">Zoom Out</button>
+      <button id="resetZoom" class="control-btn">Reset Zoom</button>
     </div>
   </div>
   
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', () => {
       const params = new URLSearchParams(window.location.search);
       const imageUrlParam = params.get("src");
       
-      // Elements
+      const imageContainer = document.querySelector('.image-container');
       const reportImage = document.getElementById('reportImage');
-      const imageContainer = document.getElementById('imageContainer');
-      const placeholder = document.getElementById('placeholder');
-      const loading = document.getElementById('loading');
-      const errorDetails = document.getElementById('errorDetails');
-      const errorMessage = document.getElementById('errorMessage');
-      
-      // Info elements
-      const imageUrl = document.getElementById('imageUrl');
-      const statusIndicator = document.getElementById('statusIndicator');
-      const imageDomain = document.getElementById('imageDomain');
-      const imageProtocol = document.getElementById('imageProtocol');
-      const imageResolution = document.getElementById('imageResolution');
-      const imageSize = document.getElementById('imageSize');
-      const imageType = document.getElementById('imageType');
-      const imageAspect = document.getElementById('imageAspect');
-      
-      // Controls
+      const loadingElement = document.getElementById('loading');
+      const errorElement = document.getElementById('error');
+      const errorDetails = document.getElementById('error-details');
+      const imageInfo = document.getElementById('imageInfo');
+      const imageUrlSpan = document.getElementById('imageUrl');
+      const imageResolutionSpan = document.getElementById('imageResolution');
       const zoomInBtn = document.getElementById('zoomIn');
       const zoomOutBtn = document.getElementById('zoomOut');
       const resetZoomBtn = document.getElementById('resetZoom');
-      const rotateBtn = document.getElementById('rotateBtn');
       
-      // State
       let currentScale = 1;
-      let currentRotation = 0;
       const MAX_ZOOM = 3;
       const MIN_ZOOM = 0.5;
       const ZOOM_STEP = 0.2;
-      
-      // Initialize
-      if (imageUrlParam) {
-        try {
-          const decodedUrl = decodeURIComponent(imageUrlParam);
-          
-          // Update info panel
-          imageUrl.textContent = decodedUrl;
-          try {
-            const url = new URL(decodedUrl);
-            imageDomain.textContent = url.hostname;
-            imageProtocol.textContent = url.protocol.replace(':', '');
-          } catch (e) {
-            imageDomain.textContent = "Invalid URL";
-            imageProtocol.textContent = "N/A";
-          }
-          
-          // Show loading
-          placeholder.classList.remove('hidden');
-          loading.classList.remove('hidden');
-          
-          // Attempt to load image
-          reportImage.src = decodedUrl;
-          
-          reportImage.onload = function() {
-            // Hide loading and placeholder
-            loading.classList.add('hidden');
-            placeholder.classList.add('hidden');
-            errorDetails.classList.add('hidden');
-            
-            // Show image
-            reportImage.classList.remove('hidden');
-            
-            // Update status
-            statusIndicator.className = 'status-indicator status-success';
-            statusIndicator.innerHTML = '<i class="fas fa-check-circle"></i> Loaded Successfully';
-            
-            // Update image info
-            imageResolution.textContent = `${this.naturalWidth} × ${this.naturalHeight}px`;
-            imageAspect.textContent = (this.naturalWidth / this.naturalHeight).toFixed(2) + ':1';
-            
-            // Simulate file size
-            const sizeKB = Math.round((this.src.length * 2) / 1024);
-            imageSize.textContent = `${sizeKB} KB (estimated)`;
-            
-            // Get file type
-            const extension = decodedUrl.split('.').pop().toUpperCase();
-            imageType.textContent = extension;
-          };
-          
-          reportImage.onerror = function() {
-            loading.classList.add('hidden');
-            placeholder.classList.add('hidden');
-            errorDetails.classList.remove('hidden');
-            
-            // Detailed error message
-            const errorText = `Failed to load image from: ${decodedUrl}\n\nPossible reasons:\n• The image does not exist on the server\n• Server is not responding (timeout)\n• CORS policy blocking the request\n• Invalid image format`;
-            errorMessage.textContent = errorText;
-            
-            // Update status
-            statusIndicator.className = 'status-indicator status-error';
-            statusIndicator.innerHTML = '<i class="fas fa-times-circle"></i> Failed to Load';
-          };
-          
-        } catch (e) {
-          // Handle errors in URL decoding
-          loading.classList.add('hidden');
-          placeholder.classList.add('hidden');
-          errorDetails.classList.remove('hidden');
-          errorMessage.textContent = `Invalid image URL: ${imageUrlParam}\n\nError details: ${e.message}`;
-          
-          // Update info panel
-          imageUrl.textContent = imageUrlParam || "Not provided";
-          statusIndicator.className = 'status-indicator status-error';
-          statusIndicator.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Invalid URL';
-        }
-      } else {
-        // No image URL provided
-        placeholder.classList.remove('hidden');
-        loading.classList.add('hidden');
-        errorDetails.classList.remove('hidden');
-        errorMessage.textContent = "No image URL provided in the query string.\n\nPlease make sure you're accessing this page with a valid 'src' parameter.";
-        
-        imageUrl.textContent = "Not provided";
-        statusIndicator.className = 'status-indicator status-warning';
-        statusIndicator.innerHTML = '<i class="fas fa-exclamation-triangle"></i> No URL Provided';
-      }
       
       // Set up zoom controls
       zoomInBtn.addEventListener('click', () => {
         if (currentScale < MAX_ZOOM) {
           currentScale += ZOOM_STEP;
-          updateImageTransform();
+          applyZoom();
         }
       });
       
       zoomOutBtn.addEventListener('click', () => {
         if (currentScale > MIN_ZOOM) {
           currentScale -= ZOOM_STEP;
-          updateImageTransform();
+          applyZoom();
         }
       });
       
       resetZoomBtn.addEventListener('click', () => {
         currentScale = 1;
-        currentRotation = 0;
-        updateImageTransform();
+        applyZoom();
       });
       
-      rotateBtn.addEventListener('click', () => {
-        currentRotation = (currentRotation + 90) % 360;
-        updateImageTransform();
-      });
+      function applyZoom() {
+        reportImage.style.transform = `scale(${currentScale})`;
+      }
       
-      function updateImageTransform() {
-        reportImage.style.transform = `scale(${currentScale}) rotate(${currentRotation}deg)`;
+      // Handle image loading
+      if (imageUrlParam) {
+        try {
+          const decodedUrl = decodeURIComponent(imageUrlParam);
+          imageUrlSpan.textContent = decodedUrl;
+          
+          // Create a valid URL - handles both absolute and relative paths
+          const fullUrl = new URL(decodedUrl, window.location.href).href;
+          
+          // Show loading indicator
+          loadingElement.classList.remove('hidden');
+          
+          // Load the image
+          reportImage.src = fullUrl;
+          
+          reportImage.onload = function() {
+            // Hide loading indicator
+            loadingElement.classList.add('hidden');
+            
+            // Show image and info
+            reportImage.classList.remove('hidden');
+            imageInfo.classList.remove('hidden');
+            
+            // Show image info
+            imageResolutionSpan.textContent = `${this.naturalWidth} × ${this.naturalHeight}px`;
+          };
+          
+          reportImage.onerror = function() {
+            loadingElement.classList.add('hidden');
+            errorElement.classList.remove('hidden');
+            errorDetails.textContent = `Failed to load image from: ${decodedUrl}`;
+          };
+        } catch (e) {
+          // Handle invalid URL
+          loadingElement.classList.add('hidden');
+          errorElement.classList.remove('hidden');
+          errorDetails.textContent = `Invalid image URL: ${imageUrlParam}`;
+        }
+      } else {
+        // No image provided
+        loadingElement.classList.add('hidden');
+        errorElement.classList.remove('hidden');
+        errorDetails.textContent = "No image URL provided in the query string";
       }
     });
   </script>
