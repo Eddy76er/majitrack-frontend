@@ -24,12 +24,7 @@
 
       <!-- Water Source Type -->
       <label for="waterSourceType">Water Source Type:</label>
-      <select id="waterSourceType" required>
-        <option value="">-- Select Type --</option>
-        <option value="borehole">Borehole</option>
-        <option value="water kiosk">Water Kiosk</option>
-        <option value="well">Well</option>
-      </select>
+      <select id="waterSourceType" required></select>
 
       <!-- Description -->
       <label for="description">Description:</label>
@@ -49,6 +44,8 @@
 
   <script>
     const locationSelect = document.getElementById('location');
+    const waterSourceTypeSelect = document.getElementById('waterSourceType');
+    const form = document.getElementById('reportForm');
     let waterSources = [];
 
     document.addEventListener('DOMContentLoaded', async () => {
@@ -60,13 +57,42 @@
         });
         waterSources = await res.json();
 
-        // Populate dropdown with unique locations
-        const locations = [...new Set(waterSources.map(ws => ws.location))];
-        locations.forEach(loc => {
+        // Populate unique locations
+        const uniqueLocations = [...new Set(waterSources.map(ws => ws.location))];
+        uniqueLocations.forEach(loc => {
           const option = document.createElement('option');
           option.value = loc;
           option.textContent = loc;
           locationSelect.appendChild(option);
+        });
+
+        // Update water source type based on location
+        locationSelect.addEventListener('change', () => {
+          const selectedLocation = locationSelect.value;
+          const matchingSources = waterSources.filter(ws => ws.location === selectedLocation);
+
+          waterSourceTypeSelect.innerHTML = '';
+
+          if (matchingSources.length === 1) {
+            const singleOption = document.createElement('option');
+            singleOption.value = matchingSources[0].water_source_type;
+            singleOption.textContent = matchingSources[0].water_source_type;
+            waterSourceTypeSelect.appendChild(singleOption);
+            waterSourceTypeSelect.value = matchingSources[0].water_source_type;
+          } else {
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = '-- Select Type --';
+            waterSourceTypeSelect.appendChild(defaultOption);
+
+            const uniqueTypes = [...new Set(matchingSources.map(ws => ws.water_source_type))];
+            uniqueTypes.forEach(type => {
+              const option = document.createElement('option');
+              option.value = type;
+              option.textContent = type;
+              waterSourceTypeSelect.appendChild(option);
+            });
+          }
         });
       } catch (err) {
         console.error('Failed to load water sources', err);
@@ -78,7 +104,6 @@
       window.location.href = 'index.html';
     }
 
-    const form = document.getElementById('reportForm');
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
@@ -92,10 +117,9 @@
         return window.location.href = 'login.html';
       }
 
-      const location = document.getElementById('location').value;
-      const waterSourceType = document.getElementById('waterSourceType').value;
+      const location = locationSelect.value;
+      const waterSourceType = waterSourceTypeSelect.value;
 
-      // Find matching water source ID
       const selectedSource = waterSources.find(ws =>
         ws.location === location && ws.water_source_type === waterSourceType
       );
@@ -129,6 +153,7 @@
         const result = await response.json();
         document.getElementById('responseMsg').innerText = result.message || '✅ Report submitted!';
         form.reset();
+        waterSourceTypeSelect.innerHTML = ''; // clear after reset
       } catch (err) {
         console.error(err);
         document.getElementById('responseMsg').innerText = '❌ Error submitting report.';
