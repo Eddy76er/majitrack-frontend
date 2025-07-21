@@ -1,9 +1,9 @@
-<!-- signup.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <title>Sign Up | Majitrack</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
@@ -45,9 +45,24 @@
 
         const data = await res.json();
 
-        if (res.ok) {
+        if (res.ok && data.token) {
+          // ✅ Save all values used in other pages
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('user_id', data.user.id);
+          localStorage.setItem('role', data.user.role);
+          localStorage.setItem('name', data.user.name);
+          localStorage.setItem('phone_number', data.user.phone_number);
+
           document.getElementById('signupMsg').innerText = '✅ Signup successful! Redirecting...';
-          setTimeout(() => window.location.href = 'index.html', 1500);
+
+          // ✅ Redirect based on role
+          setTimeout(() => {
+            if (data.user.role === 'admin') {
+              window.location.href = 'admin.html';
+            } else {
+              window.location.href = 'resident.html';
+            }
+          }, 1500);
         } else {
           document.getElementById('signupMsg').innerText = data.message || '❌ Signup failed.';
         }

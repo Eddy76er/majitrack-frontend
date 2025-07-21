@@ -1,9 +1,9 @@
-<!-- login.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <title>Login | Majitrack</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
@@ -16,51 +16,49 @@
     </form>
     <div id="loginMsg"></div>
   </div>
-<script>
-  const form = document.getElementById('loginForm');
 
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
+  <script>
+    const form = document.getElementById('loginForm');
 
-    const credentials = {
-      phoneNumber: document.getElementById('phoneNumber').value,
-      password: document.getElementById('password').value
-    };
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
 
-    try {
-      const res = await fetch('https://majitrack-backend.onrender.com/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(credentials)
-      });
+      const credentials = {
+        phoneNumber: document.getElementById('phoneNumber').value,
+        password: document.getElementById('password').value
+      };
 
-      const data = await res.json();
+      try {
+        const res = await fetch('https://majitrack-backend.onrender.com/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(credentials)
+        });
 
-      if (res.ok && data.token) {
-        // ✅ Store user info and token
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('userId', data.user.id);
-        localStorage.setItem('userRole', data.user.role);
-        localStorage.setItem('userName', data.user.name);
+        const data = await res.json();
 
-        // ✅ Redirect based on user role
-        if (data.user.role === 'admin') {
-          window.location.href = 'admin.html';
+        if (res.ok && data.token) {
+          // ✅ Store data in a consistent format used across all pages
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('user_id', data.user.id);
+          localStorage.setItem('role', data.user.role);
+          localStorage.setItem('name', data.user.name);
+          localStorage.setItem('phone_number', data.user.phone_number);
+
+          // ✅ Redirect based on role
+          if (data.user.role === 'admin') {
+            window.location.href = 'admin.html';
+          } else {
+            window.location.href = 'resident.html';
+          }
         } else {
-          window.location.href = 'resident.html';
+          document.getElementById('loginMsg').innerText = data.message || '❌ Invalid phone number or password.';
         }
-      } else {
-        document.getElementById('loginMsg').innerText = data.message || '❌ Invalid credentials.';
+      } catch (err) {
+        console.error(err);
+        document.getElementById('loginMsg').innerText = '⚠️ Error logging in. Please try again.';
       }
-
-    } catch (err) {
-      console.error(err);
-      document.getElementById('loginMsg').innerText = '⚠️ Error logging in.';
-    }
-  });
-</script>
-
+    });
+  </script>
 </body>
 </html>
-
-
