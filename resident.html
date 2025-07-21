@@ -16,7 +16,7 @@
     <h2>📝 Submit Water Issue</h2>
 
     <form id="reportForm" enctype="multipart/form-data">
-      <!-- Location dropdown populated from DB -->
+      <!-- Location -->
       <label for="location">Location:</label>
       <select id="location" required>
         <option value="">-- Select Location --</option>
@@ -39,7 +39,6 @@
       <label for="image">Attach Image (optional):</label>
       <input type="file" id="image" accept="image/*">
 
-      <!-- Default Fields (hidden/auto-handled in backend): status, date, user_id, report_id, water_source_id -->
       <br><br>
       <button type="submit">📤 Submit Report</button>
       <button type="button" onclick="window.location.href='sent_report.html'">📄 View Sent Reports</button>
@@ -49,50 +48,71 @@
   </div>
 
   <script>
-    // Load locations from backend (water_sources)
+    const locationSelect = document.getElementById('location');
+    let waterSources = [];
+
     document.addEventListener('DOMContentLoaded', async () => {
-      const locationSelect = document.getElementById('location');
       try {
         const res = await fetch('https://majitrack-backend.onrender.com/api/water-sources', {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`
           }
         });
-        const locations = await res.json();
-        locations.forEach(source => {
+        waterSources = await res.json();
+
+        // Populate dropdown with unique locations
+        const locations = [...new Set(waterSources.map(ws => ws.location))];
+        locations.forEach(loc => {
           const option = document.createElement('option');
-          option.value = source.location;
-          option.textContent = source.location;
+          option.value = loc;
+          option.textContent = loc;
           locationSelect.appendChild(option);
         });
       } catch (err) {
-        console.error('Failed to load locations', err);
+        console.error('Failed to load water sources', err);
       }
     });
 
-    // Handle logout
     function logout() {
       localStorage.clear();
       window.location.href = 'index.html';
     }
 
-    // Submit report
     const form = document.getElementById('reportForm');
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
       const token = localStorage.getItem('token');
-      if (!token) {
+      const user_id = localStorage.getItem('user_id');
+      const name = localStorage.getItem('name');
+      const phone_number = localStorage.getItem('phone_number');
+
+      if (!token || !user_id || !name || !phone_number) {
         alert('Please log in first.');
         return window.location.href = 'login.html';
       }
 
+      const location = document.getElementById('location').value;
+      const waterSourceType = document.getElementById('waterSourceType').value;
+
+      // Find matching water source ID
+      const selectedSource = waterSources.find(ws =>
+        ws.location === location && ws.water_source_type === waterSourceType
+      );
+
+      if (!selectedSource) {
+        alert('No matching water source found.');
+        return;
+      }
+
       const formData = new FormData();
-      formData.append('location', document.getElementById('location').value);
-      formData.append('water_source_type', document.getElementById('waterSourceType').value);
+      formData.append('user_id', user_id);
+      formData.append('name', name);
+      formData.append('phone_number', phone_number);
       formData.append('description', document.getElementById('description').value);
-      formData.append('status', 'pending'); // Default status
-      formData.append('date_created', new Date().toISOString()); // Auto capture
+      formData.append('status', 'pending');
+      formData.append('date_created', new Date().toISOString());
+      formData.append('water_source_id', selectedSource.water_source_id);
 
       const image = document.getElementById('image').files[0];
       if (image) formData.append('image', image);
@@ -117,5 +137,3 @@
   </script>
 </body>
 </html>
-
-
