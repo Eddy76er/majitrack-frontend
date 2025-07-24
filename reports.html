@@ -1,4 +1,3 @@
-<!-- reports.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,335 +7,158 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #f2f6fc;
-      padding: 2rem;
+      font-family: Arial, sans-serif;
+      padding: 1rem;
+      background: #f2f2f2;
     }
-
-    h2 {
+    h1 {
       text-align: center;
-      margin-bottom: 1rem;
-      color: #023e8a;
     }
-
     table {
       width: 100%;
       border-collapse: collapse;
-      background-color: white;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      margin-top: 1rem;
+      background: #fff;
     }
-
     th, td {
-      padding: 0.8rem;
-      border-bottom: 1px solid #ddd;
+      border: 1px solid #ddd;
+      padding: 0.5rem;
       text-align: left;
     }
-
     th {
-      background-color: #0077b6;
+      background-color: #4CAF50;
       color: white;
-      position: sticky;
-      top: 0;
     }
-
-    tr:hover {
-      background-color: #f1f1f1;
+    img.thumbnail {
+      max-width: 80px;
+      max-height: 80px;
     }
-
-    .view-btn {
-      background-color: #2196F3;
-      color: white;
-      padding: 6px 12px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .view-btn:hover {
-      background-color: #0b7dda;
-      transform: translateY(-1px);
-    }
-
     .modal {
       display: none;
       position: fixed;
-      z-index: 100;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      overflow: auto;
-      background-color: rgba(0,0,0,0.5);
-      backdrop-filter: blur(5px);
+      top: 5%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      max-width: 500px;
+      background: white;
+      border: 2px solid #444;
+      padding: 1rem;
+      z-index: 1000;
     }
-
-    .modal-content {
-      background-color: #fff;
-      margin: 5% auto;
-      padding: 30px;
-      border-radius: 15px;
-      width: 80%;
-      max-width: 700px;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-    }
-
-    .close {
-      float: right;
-      font-size: 28px;
-      font-weight: bold;
-      color: #aaa;
-      cursor: pointer;
-      transition: color 0.3s;
-    }
-
-    .close:hover {
-      color: #333;
-    }
-
-    .resolve-btn {
-      margin-top: 1.5rem;
-      background-color: #28a745;
-      color: white;
-      padding: 12px 20px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 16px;
+    .modal.active {
       display: block;
-      width: 100%;
     }
-
-    .resolve-btn:hover {
-      background-color: #218838;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    .modal-header {
+      font-weight: bold;
+      margin-bottom: 1rem;
     }
-
-    .filter-container {
-      display: flex;
-      justify-content: space-between;
-      margin: 1.5rem 0;
-      flex-wrap: wrap;
-      gap: 15px;
-    }
-
-    .filter-group {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    select, input {
-      padding: 10px;
-      border-radius: 5px;
-      border: 1px solid #ddd;
-      font-size: 14px;
-    }
-
-    label {
-      font-weight: 500;
-      color: #555;
-    }
-
-    #reportDetails {
-      margin-top: 20px;
-      line-height: 1.6;
-    }
-
-    #reportDetails p {
-      margin-bottom: 10px;
-    }
-
-    #reportDetails strong {
-      color: #0077b6;
-      display: inline-block;
-      width: 150px;
-    }
-
-    .view-image-btn {
-      background-color: #4CAF50;
+    .modal button {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      background: #4CAF50;
       color: white;
-      padding: 6px 12px;
       border: none;
-      border-radius: 4px;
       cursor: pointer;
-      margin-top: 10px;
+    }
+    .view-image-btn {
       display: inline-block;
+      margin-top: 0.5rem;
+      background: #007BFF;
+      color: #fff;
+      padding: 0.3rem 0.6rem;
       text-decoration: none;
-    }
-
-    .view-image-btn:hover {
-      background-color: #3e8e41;
-    }
-
-    @media (max-width: 768px) {
-      .filter-container {
-        flex-direction: column;
-      }
-      
-      .modal-content {
-        width: 95%;
-        margin: 20% auto;
-      }
+      border-radius: 4px;
     }
   </style>
 </head>
 <body>
-  <h2>📋 Reports from Residents</h2>
-
-  <div class="filter-container">
-    <div class="filter-group">
-      <label for="statusFilter">Status:</label>
-      <select id="statusFilter">
-        <option value="">All</option>
-        <option value="pending">Pending</option>
-        <option value="resolved">Resolved</option>
-      </select>
-    </div>
-    
-    <div class="filter-group">
-      <label for="fromDate">From:</label>
-      <input type="date" id="fromDate">
-    </div>
-    
-    <div class="filter-group">
-      <label for="toDate">To:</label>
-      <input type="date" id="toDate">
-    </div>
-  </div>
-
-  <table>
+  <h1>Submitted Reports</h1>
+  <table id="reportsTable">
     <thead>
       <tr>
-        <th>User ID</th>
-        <th>Name</th>
+        <th>Report ID</th>
+        <th>User</th>
+        <th>Phone</th>
         <th>Location</th>
-        <th>Water Source Type</th>
+        <th>Type</th>
         <th>Status</th>
         <th>Date</th>
-        <th>Action</th>
+        <th>Thumbnail</th>
+        <th>View</th>
       </tr>
     </thead>
-    <tbody id="reportTableBody"></tbody>
+    <tbody></tbody>
   </table>
 
-  <!-- Modal -->
+  <!-- Modal for detailed view -->
   <div id="reportModal" class="modal">
-    <div class="modal-content">
-      <span class="close" onclick="closeModal()">&times;</span>
-      <h3>📝 Report Details</h3>
-      <div id="reportDetails"></div>
-      <button class="resolve-btn" id="resolveBtn">Resolve</button>
-    </div>
+    <div class="modal-header">Report Details</div>
+    <div id="modalContent"></div>
+    <button onclick="closeModal()">Close</button>
   </div>
 
   <script>
-    const token = localStorage.getItem('token');
-    const tableBody = document.getElementById('reportTableBody');
-    const statusFilter = document.getElementById('statusFilter');
-    const fromDateFilter = document.getElementById('fromDate');
-    const toDateFilter = document.getElementById('toDate');
-    let allReports = [];
+    const API_URL = 'https://majitrack-backend.onrender.com/api/reports';
 
-    const fetchReports = async () => {
-      try {
-        const res = await fetch('https://majitrack-backend.onrender.com/api/reports', {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-        const data = await res.json();
-        allReports = data;
-        displayReports(allReports);
-      } catch (err) {
-        console.error('Error fetching reports:', err);
-      }
-    };
+    async function fetchReports() {
+      const response = await fetch(API_URL);
+      const reports = await response.json();
+      const tbody = document.querySelector('#reportsTable tbody');
+      tbody.innerHTML = '';
 
-    const displayReports = (reports) => {
-      tableBody.innerHTML = '';
       reports.forEach(report => {
         const row = document.createElement('tr');
+
+        const imageUrl = report.image_path ? report.image_path : null;
+
         row.innerHTML = `
-          <td>${report.user_id}</td>
-          <td>${report.name || 'N/A'}</td>
+          <td>${report.report_id || '-'}</td>
+          <td>${report.name}</td>
+          <td>${report.phone_number}</td>
           <td>${report.location}</td>
           <td>${report.water_source_type}</td>
           <td>${report.status}</td>
           <td>${new Date(report.date_created).toLocaleDateString()}</td>
-          <td><button class="view-btn" onclick='showModal(${JSON.stringify(report)})'>View</button></td>
+          <td>
+            ${imageUrl ? `<a href="viewImage.html?image=${encodeURIComponent(imageUrl)}" target="_blank"><img src="${imageUrl}" class="thumbnail" alt="report image"/></a>` : 'No image'}
+          </td>
+          <td><button onclick='showDetails(${JSON.stringify(report)})'>View</button></td>
         `;
-        tableBody.appendChild(row);
+
+        tbody.appendChild(row);
       });
-    };
+    }
 
-    const showModal = (report) => {
+    function showDetails(report) {
       const modal = document.getElementById('reportModal');
-      const details = document.getElementById('reportDetails');
-      const resolveBtn = document.getElementById('resolveBtn');
+      const content = document.getElementById('modalContent');
 
-      const imageUrl = report.image_path ? `https://majitrack-backend.onrender.com/${report.image_path}` : null;
-      const viewImageBtn = imageUrl ? `<a class="view-image-btn" target="_blank" href="viewImage.html?src=${encodeURIComponent(imageUrl)}">View Full Image</a>` : 'No image';
+      const imageUrl = report.image_path ? report.image_path : null;
 
-      details.innerHTML = `
-        <p><strong>User ID:</strong> ${report.user_id}</p>
-        <p><strong>Name:</strong> ${report.name || 'N/A'}</p>
-        <p><strong>Phone Number:</strong> ${report.phone_number || 'N/A'}</p>
+      content.innerHTML = `
+        <p><strong>User:</strong> ${report.name}</p>
+        <p><strong>Phone:</strong> ${report.phone_number}</p>
         <p><strong>Location:</strong> ${report.location}</p>
         <p><strong>Water Source Type:</strong> ${report.water_source_type}</p>
         <p><strong>Description:</strong> ${report.description}</p>
         <p><strong>Status:</strong> ${report.status}</p>
-        <p><strong>Date:</strong> ${new Date(report.date_created).toLocaleString()}</p>
-        <p><strong>Image:</strong> ${viewImageBtn}</p>
+        <p><strong>Date Created:</strong> ${new Date(report.date_created).toLocaleString()}</p>
+        <p><strong>Image:</strong></p>
+        ${imageUrl ? `
+          <img src="${imageUrl}" alt="Submitted Report Image" style="max-width:100%;"/>
+          <br/><a class="view-image-btn" target="_blank" href="viewImage.html?image=${encodeURIComponent(imageUrl)}">View Full Image in New Tab</a>
+        ` : 'No image attached.'}
       `;
 
-      resolveBtn.onclick = () => {
-        window.location.href = `adminResponses.html?reportId=${report.report_id}`;
-      };
+      modal.classList.add('active');
+    }
 
-      modal.style.display = 'block';
-    };
+    function closeModal() {
+      document.getElementById('reportModal').classList.remove('active');
+    }
 
-    const closeModal = () => {
-      document.getElementById('reportModal').style.display = 'none';
-    };
-
-    const filterReports = () => {
-      let filtered = [...allReports];
-
-      if (statusFilter.value) {
-        filtered = filtered.filter(r => r.status === statusFilter.value);
-      }
-
-      if (fromDateFilter.value) {
-        const fromDate = new Date(fromDateFilter.value);
-        filtered = filtered.filter(r => new Date(r.date_created) >= fromDate);
-      }
-
-      if (toDateFilter.value) {
-        const toDate = new Date(toDateFilter.value);
-        toDate.setHours(23, 59, 59, 999);
-        filtered = filtered.filter(r => new Date(r.date_created) <= toDate);
-      }
-
-      displayReports(filtered);
-    };
-
-    statusFilter.addEventListener('change', filterReports);
-    fromDateFilter.addEventListener('change', filterReports);
-    toDateFilter.addEventListener('change', filterReports);
-
-    window.onclick = (event) => {
-      if (event.target === document.getElementById('reportModal')) {
-        closeModal();
-      }
-    };
-
-    toDateFilter.valueAsDate = new Date();
-    fetchReports();
+    window.onload = fetchReports;
   </script>
 </body>
 </html>
