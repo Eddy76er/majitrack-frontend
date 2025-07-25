@@ -36,32 +36,36 @@
       margin-top: 1rem;
       font-size: 0.9rem;
       color: #666;
-      word-break: break-all;
+      word-break: break-word;
     }
   </style>
 </head>
 <body>
   <h1>Submitted Report Image</h1>
-  <img id="reportImage" alt="Report Image" />
+  <img id="reportImage" alt="⚠️ Image failed to load" />
   <div class="link-container">
     <a id="openImageLink" href="#" target="_blank" rel="noopener noreferrer">🔗 View Full Image in New Tab</a>
   </div>
-  <div class="url-display">Image URL: <span id="imageUrlSpan"></span></div>
+  <div class="url-display">
+    Image URL: <span id="imageUrlSpan">❌ No image URL found in request.</span>
+  </div>
 
   <script>
     const params = new URLSearchParams(window.location.search);
-    const imageUrlParam = params.get("image");
+    const imageUrlParam = params.get("src") || params.get("image"); // Support both ?src and ?image
+    const imageTag = document.getElementById("reportImage");
+    const span = document.getElementById("imageUrlSpan");
+    const link = document.getElementById("openImageLink");
 
     if (imageUrlParam) {
       const decodedUrl = decodeURIComponent(imageUrlParam);
-      document.getElementById("reportImage").src = decodedUrl;
-      document.getElementById("imageUrlSpan").textContent = decodedUrl;
-
-      // Set link href to Cloudinary URL
-      document.getElementById("openImageLink").href = decodedUrl;
+      imageTag.src = decodedUrl;
+      span.textContent = decodedUrl;
+      link.href = decodedUrl;
     } else {
-      document.getElementById("reportImage").alt = "⚠️ Image failed to load";
-      document.getElementById("imageUrlSpan").textContent = "❌ No image URL found in request.";
+      imageTag.style.display = "none"; // Hide broken image icon
+      span.textContent = "❌ No image URL found in request.";
+      link.style.display = "none"; // Hide the link if no image
     }
   </script>
 </body>
