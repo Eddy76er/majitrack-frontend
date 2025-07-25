@@ -278,8 +278,10 @@
       const details = document.getElementById('reportDetails');
       const resolveBtn = document.getElementById('resolveBtn');
 
-      const imageUrl = report.image_path ? `https://majitrack-backend.onrender.com/${report.image_path}` : null;
-      const viewImageBtn = imageUrl ? `<a class="view-image-btn" target="_blank" href="viewImage.html?src=${encodeURIComponent(imageUrl)}">View Full Image</a>` : 'No image';
+     const imageUrl = report.image_path ? report.image_path : null;
+     const viewImageBtn = imageUrl
+     ? `<a class="view-image-btn" target="_blank" href="viewImage.html?src=${encodeURIComponent(imageUrl)}">View Full Image</a>`
+     : 'No image';
 
       details.innerHTML = `
         <p><strong>User ID:</strong> ${report.user_id}</p>
