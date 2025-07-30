@@ -1,3 +1,4 @@
+adminResponses.html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -82,47 +83,50 @@
 
     <div id="msg" class="msg"></div>
   </div>
+<script>
+  const token = localStorage.getItem('token');
+  const reportId = localStorage.getItem('selectedReportId');
+  const userId = localStorage.getItem('selectedUserId');
 
-  <script>
-    const token = localStorage.getItem('token');
-    const reportId = localStorage.getItem('selectedReportId');
+  const form = document.getElementById('responseForm');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-    const form = document.getElementById('responseForm');
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
+    const comment = document.getElementById('comment').value;
+    const status = document.getElementById('status').value;
 
-      const comments = document.getElementById('comment').value;
-      const status = document.getElementById('status').value;
+    const data = {
+      report_id: reportId,
+      user_id: userId,
+      comment,
+      status
+    };
 
-      const data = {
-        report_id: reportId,
-        comments,
-        status
-      };
+    try {
+      const res = await fetch('https://majitrack-backend.onrender.com/api/admin/responses', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(data)
+      });
 
-      try {
-        const res = await fetch('https://majitrack-backend.onrender.com/api/admin-responses', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`
-          },
-          body: JSON.stringify(data)
-        });
+      const result = await res.json();
 
-        const result = await res.json();
-
-        if (res.ok) {
-          document.getElementById('msg').innerText = '✅ Response submitted successfully!';
-          form.reset();
-        } else {
-          document.getElementById('msg').innerText = result.message || '❌ Failed to send response.';
-        }
-      } catch (err) {
-        console.error('Error submitting response:', err);
-        document.getElementById('msg').innerText = '⚠️ Network or server error.';
+      if (res.ok) {
+        document.getElementById('msg').innerText = '✅ Response submitted successfully!';
+        form.reset();
+      } else {
+        document.getElementById('msg').innerText = result.message || '❌ Failed to send response.';
       }
-    });
-  </script>
+    } catch (err) {
+      console.error('Error submitting response:', err);
+      document.getElementById('msg').innerText = '⚠️ Network or server error.';
+    }
+  });
+</script>
+
+  
 </body>
 </html>
