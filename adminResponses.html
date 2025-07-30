@@ -7,60 +7,14 @@
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-      background-color: #f0f4f8;
-      padding: 2rem;
-    }
-
-    .container {
-      max-width: 600px;
-      background-color: white;
-      margin: auto;
-      padding: 2rem;
-      border-radius: 10px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.1);
-    }
-
-    h2 {
-      text-align: center;
-      color: #023e8a;
-    }
-
-    label {
-      font-weight: 600;
-      display: block;
-      margin-top: 1rem;
-    }
-
-    textarea, select {
-      width: 100%;
-      padding: 10px;
-      margin-top: 0.3rem;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-
-    button {
-      margin-top: 1.5rem;
-      width: 100%;
-      background-color: #0077b6;
-      color: white;
-      padding: 0.8rem;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    button:hover {
-      background-color: #0096c7;
-    }
-
-    .msg {
-      margin-top: 1rem;
-      font-weight: bold;
-      text-align: center;
+    /* ... existing styles ... */
+    .msg.error { color: #d90429; }
+    .msg.success { color: #2b9348; }
+    
+    textarea:focus, select:focus {
+      border-color: #0077b6;
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(0, 119, 182, 0.2);
     }
   </style>
 </head>
@@ -69,63 +23,94 @@
     <h2><i class="fas fa-reply"></i> Respond to Report</h2>
 
     <form id="responseForm">
-      <label for="comment">Your Response</label>
-      <textarea id="comment" rows="5" placeholder="Enter your comments..." required></textarea>
+      <label for="comments">Your Response</label>
+      <textarea id="comments" name="comments" rows="5" placeholder="Enter your comments..." required></textarea>
 
       <label for="status">Status</label>
-      <select id="status" required>
-        <option value="resolved" selected>Resolved</option>
+      <select id="status" name="status" required>
+        <option value="">Select Status</option>
+        <option value="resolved">Resolved</option>
+        <option value="rejected">Rejected</option>
+        <option value="pending">Pending</option>
       </select>
 
-      <button type="submit">Send Response</button>
+      <button type="submit">
+        <span id="buttonText">Send Response</span>
+        <span id="buttonSpinner" style="display:none;">
+          <i class="fas fa-spinner fa-spin"></i> Sending...
+        </span>
+      </button>
     </form>
 
     <div id="msg" class="msg"></div>
   </div>
+
 <script>
-  const token = localStorage.getItem('token');
-  const reportId = localStorage.getItem('selectedReportId');
-  const userId = localStorage.getItem('selectedUserId');
-
-  const form = document.getElementById('responseForm');
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const comment = document.getElementById('comment').value;
-    const status = document.getElementById('status').value;
-
-    const data = {
-      report_id: reportId,
-      user_id: userId,
-      comment,
-      status
-    };
-
-    try {
-      const res = await fetch('https://majitrack-backend.onrender.com/api/admin/responses', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify(data)
-      });
-
-      const result = await res.json();
-
-      if (res.ok) {
-        document.getElementById('msg').innerText = '✅ Response submitted successfully!';
-        form.reset();
-      } else {
-        document.getElementById('msg').innerText = result.message || '❌ Failed to send response.';
-      }
-    } catch (err) {
-      console.error('Error submitting response:', err);
-      document.getElementById('msg').innerText = '⚠️ Network or server error.';
+  document.addEventListener('DOMContentLoaded', () => {
+    const token = localStorage.getItem('token');
+    const reportId = localStorage.getItem('selectedReportId');
+    
+    if (!token || !reportId) {
+      const msg = document.getElementById('msg');
+      msg.innerText = '❌ Missing required data. Please reload the page.';
+      msg.className = 'msg error';
+      document.getElementById('responseForm').style.opacity = '0.5';
+      return;
     }
+
+    const form = document.getElementById('responseForm');
+    const buttonText = document.getElementById('buttonText');
+    const buttonSpinner = document.getElementById('buttonSpinner');
+    
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      // Show loading state
+      buttonText.style.display = 'none';
+      buttonSpinner.style.display = 'inline';
+      const button = form.querySelector('button');
+      button.disabled = true;
+      
+      const comments = document.getElementById('comments').value;
+      const status = document.getElementById('status').value;
+      const msg = document.getElementById('msg');
+      
+      try {
+        const res = await fetch('https://majitrack-backend.onrender.com/api/admin/responses', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ 
+            report_id: reportId, 
+            comments, 
+            status 
+          })
+        });
+
+        const result = await res.json();
+
+        if (res.ok) {
+          msg.innerText = '✅ Response submitted! Redirecting...';
+          msg.className = 'msg success';
+          setTimeout(() => window.location.href = '/admin/reports', 1500);
+        } else {
+          msg.innerText = result.message || '❌ Failed to send response.';
+          msg.className = 'msg error';
+        }
+      } catch (err) {
+        msg.innerText = '⚠️ Network error. Please try again.';
+        msg.className = 'msg error';
+        console.error('Submission error:', err);
+      } finally {
+        // Reset button state
+        buttonText.style.display = 'inline';
+        buttonSpinner.style.display = 'none';
+        button.disabled = false;
+      }
+    });
   });
 </script>
-
-  
 </body>
 </html>
