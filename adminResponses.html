@@ -1,4 +1,3 @@
-adminResponses.html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -83,50 +82,46 @@ adminResponses.html
 
     <div id="msg" class="msg"></div>
   </div>
-<script>
-  const token = localStorage.getItem('token');
-  const reportId = localStorage.getItem('selectedReportId');
-  const userId = localStorage.getItem('selectedUserId');
 
-  const form = document.getElementById('responseForm');
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
+  <script>
+    const token = localStorage.getItem('token');
+    const reportId = localStorage.getItem('selectedReportId');
 
-    const comment = document.getElementById('comment').value;
-    const status = document.getElementById('status').value;
+    const form = document.getElementById('responseForm');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
 
-    const data = {
-      report_id: reportId,
-      user_id: userId,
-      comment,
-      status
-    };
+      const comment = document.getElementById('comment').value;
+      const status = document.getElementById('status').value;
 
-    try {
-      const res = await fetch('https://majitrack-backend.onrender.com/api/admin/responses', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify(data)
-      });
-
-      const result = await res.json();
-
-      if (res.ok) {
-        document.getElementById('msg').innerText = '✅ Response submitted successfully!';
-        form.reset();
-      } else {
-        document.getElementById('msg').innerText = result.message || '❌ Failed to send response.';
+      if (!reportId) {
+        document.getElementById('msg').innerText = '❌ No report selected.';
+        return;
       }
-    } catch (err) {
-      console.error('Error submitting response:', err);
-      document.getElementById('msg').innerText = '⚠️ Network or server error.';
-    }
-  });
-</script>
 
-  
+      try {
+        const res = await fetch(`https://majitrack-backend.onrender.com/api/admin-responses?report_id=${reportId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token && { Authorization: `Bearer ${token}` })
+          },
+          body: JSON.stringify({ comments: comment, status })
+        });
+
+        const result = await res.json();
+
+        if (res.ok) {
+          document.getElementById('msg').innerText = '✅ Response submitted successfully!';
+          form.reset();
+        } else {
+          document.getElementById('msg').innerText = result.message || '❌ Failed to send response.';
+        }
+      } catch (err) {
+        console.error('Error submitting response:', err);
+        document.getElementById('msg').innerText = '⚠️ Network or server error.';
+      }
+    });
+  </script>
 </body>
 </html>
