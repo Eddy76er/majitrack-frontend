@@ -85,7 +85,10 @@
 
   <script>
     const token = localStorage.getItem('token');
-    const reportId = localStorage.getItem('selectedReportId');
+
+    // ✅ Get reportId from the query string
+    const queryParams = new URLSearchParams(window.location.search);
+    const reportId = queryParams.get("reportId");
 
     const form = document.getElementById('responseForm');
     form.addEventListener('submit', async (e) => {
