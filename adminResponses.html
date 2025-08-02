@@ -91,9 +91,9 @@
     const token = localStorage.getItem('token');
     const queryParams = new URLSearchParams(window.location.search);
 
-    const report_id = parseInt(queryParams.get("report_id"));
-    const user_id = parseInt(queryParams.get("user_id"));
-    const water_source_id = parseInt(queryParams.get("water_source_id"));
+    const report_id = queryParams.get("report_id");
+    const user_id = queryParams.get("user_id");
+    const water_source_id = queryParams.get("water_source_id");
 
     // Set hidden inputs
     document.getElementById('report_id').value = report_id;
@@ -111,8 +111,8 @@
       const msgDiv = document.getElementById('msg');
       msgDiv.innerText = '';
 
-      if (isNaN(report_id) || isNaN(user_id) || isNaN(water_source_id)) {
-        msgDiv.innerText = '❌ Missing or invalid report/user/water source ID.';
+      if (!report_id || !user_id || !water_source_id) {
+        msgDiv.innerText = '❌ Missing report/user/water source ID.';
         return;
       }
 
@@ -148,5 +148,3 @@
   </script>
 </body>
 </html>
-
-
