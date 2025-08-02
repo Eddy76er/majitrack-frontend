@@ -160,12 +160,10 @@
       }
     }
 
-    // Dynamically update water source types based on selected location
     document.getElementById('location').addEventListener('change', () => {
       const selectedLocation = document.getElementById('location').value;
       const typeSelect = document.getElementById('water_source_type');
 
-      // Clear previous options
       typeSelect.innerHTML = '';
 
       const types = [...new Set(
@@ -216,13 +214,13 @@
       }
 
       const formData = new FormData();
-      formData.append('user_id', userId);
+      formData.append('user_id', parseInt(userId));
       formData.append('name', name);
       formData.append('phone_number', phone);
       formData.append('description', document.getElementById('description').value);
       formData.append('status', 'pending');
       formData.append('date_created', new Date().toISOString());
-      formData.append('water_source_id', selectedSource.water_source_id);
+      formData.append('water_source_id', parseInt(selectedSource.water_source_id));
       formData.append('water_source_type', waterSourceType);
 
       const image = document.getElementById('image').files[0];
