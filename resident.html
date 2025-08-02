@@ -2,255 +2,173 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Submit Report | Majitrack</title>
+  <title>Submit Water Issue | Majitrack</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #eaf4f8;
-      margin: 0;
-      padding: 0;
+      background: #f4f4f4;
+      padding: 20px;
     }
 
     header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      background-color: #0b6e99;
-      color: white;
+      margin-bottom: 20px;
+    }
+
+    button {
       padding: 10px 20px;
-    }
-
-    header button {
-      background-color: #ffffff;
-      color: #0b6e99;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 6px;
+      margin: 5px;
+      font-size: 16px;
       cursor: pointer;
-      font-weight: bold;
     }
 
-    h2 {
+    h1 {
       text-align: center;
-      margin: 20px 0;
-      color: #0b6e99;
     }
 
     form {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
       max-width: 600px;
       margin: 0 auto;
-      background-color: white;
-      padding: 25px;
-      border-radius: 10px;
-      box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
 
     label {
       display: block;
-      margin-bottom: 8px;
+      margin-top: 15px;
       font-weight: bold;
     }
 
-    select,
-    textarea,
-    input[type="file"],
-    input[type="hidden"] {
+    select, textarea, input[type="file"] {
       width: 100%;
       padding: 10px;
-      margin-bottom: 18px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
+      margin-top: 5px;
     }
 
-    button[type="submit"],
-    .view-btn {
-      background-color: #0b6e99;
-      color: white;
-      padding: 10px 18px;
-      border: none;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
-      margin-right: 10px;
+    .button-group {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
     }
 
-    .btn-group {
-      text-align: center;
+    .button-group button {
+      flex: 1;
+      margin: 0 5px;
     }
 
-    footer {
-      margin-top: 40px;
-      text-align: center;
-      color: #777;
+    .hidden {
+      display: none;
     }
   </style>
 </head>
 <body>
 
+  <!-- 🔔 Notifications & Logout -->
   <header>
     <button onclick="window.location.href='notifications.html'">🔔 Notifications</button>
-    <button onclick="logout()">Logout</button>
+    <button onclick="window.location.href='index.html'">Logout</button>
   </header>
 
-  <h2>Submit Water Issue Report</h2>
+  <h1>Submit Water Issue Report</h1>
 
   <form id="reportForm" enctype="multipart/form-data">
-    <input type="hidden" id="user_id">
-    <input type="hidden" id="name">
-    <input type="hidden" id="phone_number">
 
-    <label for="location">Location:</label>
-    <select id="location" required></select>
+    <!-- ✅ Dropdown for Location -->
+    <label for="location">Location</label>
+    <select id="location" name="location" required>
+      <option value="">Select Location</option>
+      <!-- Options to be populated dynamically from DB -->
+    </select>
 
-    <label for="water_source_type">Water Source Type:</label>
-    <select id="water_source_type" required></select>
+    <!-- ✅ Dropdown for Water Source Type -->
+    <label for="water_source_type">Water Source Type</label>
+    <select id="water_source_type" name="water_source_type" required>
+      <option value="">Select Type</option>
+      <option value="borehole">Borehole</option>
+      <option value="water kiosk">Water Kiosk</option>
+      <option value="well">Well</option>
+    </select>
 
-    <label for="description">Description:</label>
-    <textarea id="description" rows="4" placeholder="Describe the issue..." required></textarea>
+    <!-- Description -->
+    <label for="description">Description</label>
+    <textarea id="description" name="description" rows="4" required></textarea>
 
-    <label for="image">Upload Image (optional):</label>
-    <input type="file" id="image" accept="image/*">
+    <!-- Image Upload -->
+    <label for="image">Upload Image</label>
+    <input type="file" id="image" name="image" accept="image/*" required />
 
-    <div class="btn-group">
+    <!-- Hidden Fields -->
+    <input type="hidden" id="report_id" name="report_id" />
+    <input type="hidden" id="user_id" name="user_id" />
+    <input type="hidden" id="water_source_id" name="water_source_id" />
+    <input type="hidden" id="status" name="status" value="pending" />
+    <input type="hidden" id="date_created" name="date_created" />
+
+    <!-- Submit + View Reports Buttons -->
+    <div class="button-group">
       <button type="submit">Submit Report</button>
-      <button type="button" class="view-btn" onclick="window.location.href='sent_report.html'">View Sent Reports</button>
+      <button type="button" onclick="window.location.href='sent_report.html'">View Sent Reports</button>
     </div>
   </form>
 
-  <footer>&copy; 2025 Majitrack System</footer>
-
   <script>
-    const token = localStorage.getItem('token');
-    const userId = localStorage.getItem('user_id');
-    const name = localStorage.getItem('name');
-    const phone = localStorage.getItem('phone_number');
+    // Set current date and time on load
+    document.getElementById("date_created").value = new Date().toISOString();
 
-    if (!token || !userId) {
-      alert("Session expired. Please log in again.");
-      window.location.href = "login.html";
-    }
-
-    document.getElementById('user_id').value = userId;
-    document.getElementById('name').value = name;
-    document.getElementById('phone_number').value = phone;
-
-    let waterSources = [];
-
-    async function loadWaterSources() {
+    // Example: populate location options (replace with real API call)
+    const loadLocations = async () => {
       try {
-        const response = await fetch('https://majitrack-backend.onrender.com/api/water-sources', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        const data = await response.json();
-        waterSources = data;
-
+        const response = await fetch('/api/water-sources/locations');
+        const locations = await response.json();
         const locationSelect = document.getElementById('location');
-        const uniqueLocations = [...new Set(data.map(ws => ws.location))];
 
-        uniqueLocations.forEach(loc => {
+        locations.forEach(loc => {
           const option = document.createElement('option');
-          option.value = loc;
-          option.textContent = loc;
+          option.value = loc.location;
+          option.textContent = loc.location;
           locationSelect.appendChild(option);
         });
-      } catch (err) {
-        console.error("Error loading water sources:", err);
+      } catch (error) {
+        console.error('Failed to load locations:', error);
       }
-    }
+    };
 
-    document.getElementById('location').addEventListener('change', () => {
-      const selectedLocation = document.getElementById('location').value;
-      const typeSelect = document.getElementById('water_source_type');
-
-      typeSelect.innerHTML = '';
-
-      const types = [...new Set(
-        waterSources
-          .filter(ws => ws.location === selectedLocation)
-          .map(ws => ws.water_source_type)
-      )];
-
-      if (types.length === 1) {
-        const option = document.createElement('option');
-        option.value = types[0];
-        option.textContent = types[0];
-        option.selected = true;
-        typeSelect.appendChild(option);
-      } else if (types.length > 1) {
-        const defaultOption = document.createElement('option');
-        defaultOption.disabled = true;
-        defaultOption.selected = true;
-        defaultOption.textContent = 'Choose water source type';
-        typeSelect.appendChild(defaultOption);
-
-        types.forEach(type => {
-          const option = document.createElement('option');
-          option.value = type;
-          option.textContent = type;
-          typeSelect.appendChild(option);
-        });
+    // Auto-fill user_id from local storage or session
+    window.onload = () => {
+      const userId = localStorage.getItem('user_id');
+      if (userId) {
+        document.getElementById('user_id').value = userId;
       }
-    });
+      loadLocations();
+    };
 
-    loadWaterSources();
-
-    const form = document.getElementById('reportForm');
-
-    form.addEventListener('submit', async (e) => {
+    // Submit logic
+    document.getElementById('reportForm').addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      const location = document.getElementById('location').value;
-      const waterSourceType = document.getElementById('water_source_type').value;
-
-      const selectedSource = waterSources.find(ws =>
-        ws.location === location && ws.water_source_type === waterSourceType
-      );
-
-      if (!selectedSource) {
-        alert('⚠️ No matching water source found.');
-        return;
-      }
-
-      const formData = new FormData();
-      formData.append('user_id', parseInt(userId));
-      formData.append('name', name);
-      formData.append('phone_number', phone);
-      formData.append('description', document.getElementById('description').value);
-      formData.append('status', 'pending');
-      formData.append('date_created', new Date().toISOString());
-      formData.append('water_source_id', parseInt(selectedSource.water_source_id));
-      formData.append('water_source_type', waterSourceType);
-
-      const image = document.getElementById('image').files[0];
-      if (image) formData.append('image', image);
-
+      const formData = new FormData(document.getElementById('reportForm'));
       try {
-        const response = await fetch('https://majitrack-backend-production.up.railway.app/api/reports', {
+        const response = await fetch('/api/reports', {
           method: 'POST',
-          headers: { Authorization: `Bearer ${token}` },
           body: formData
         });
 
-        const result = await response.json();
-
         if (response.ok) {
-          alert("✅ Report submitted successfully!");
-          form.reset();
+          alert('Report submitted successfully.');
+          window.location.reload();
         } else {
-          alert("❌ Failed to submit report: " + result.message);
+          const error = await response.json();
+          alert('Failed to submit report: ' + error.message);
         }
-      } catch (error) {
-        console.error("Error submitting report:", error);
-        alert("❌ Error submitting report.");
+      } catch (err) {
+        alert('Network or server error.');
+        console.error(err);
       }
     });
-
-    function logout() {
-      localStorage.clear();
-      window.location.href = "index.html";
-    }
   </script>
 </body>
 </html>
