@@ -69,6 +69,10 @@
     <h2><i class="fas fa-reply"></i> Respond to Report</h2>
 
     <form id="responseForm">
+      <input type="hidden" id="report_id" />
+      <input type="hidden" id="user_id" />
+      <input type="hidden" id="water_source_id" />
+
       <label for="comment">Your Response</label>
       <textarea id="comment" rows="5" placeholder="Enter your comments..." required></textarea>
 
@@ -86,33 +90,46 @@
   <script>
     const token = localStorage.getItem('token');
     const queryParams = new URLSearchParams(window.location.search);
-    const reportId = queryParams.get("reportId");
+
+    const report_id = parseInt(queryParams.get("report_id"));
+    const user_id = parseInt(queryParams.get("user_id"));
+    const water_source_id = parseInt(queryParams.get("water_source_id"));
+
+    // Set hidden inputs
+    document.getElementById('report_id').value = report_id;
+    document.getElementById('user_id').value = user_id;
+    document.getElementById('water_source_id').value = water_source_id;
 
     const form = document.getElementById('responseForm');
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      const comment = document.getElementById('comment').value.trim();
+      const comments = document.getElementById('comment').value.trim();
       const status = document.getElementById('status').value;
 
       const msgDiv = document.getElementById('msg');
       msgDiv.innerText = '';
 
-      // ✅ Validate reportId (must be integer)
-      if (!reportId || isNaN(reportId) || parseInt(reportId) <= 0) {
-        msgDiv.innerText = '❌ Invalid or missing report ID.';
+      if (isNaN(report_id) || isNaN(user_id) || isNaN(water_source_id)) {
+        msgDiv.innerText = '❌ Missing or invalid report/user/water source ID.';
         return;
       }
 
       try {
-        const res = await fetch(`https://majitrack-backend-production.up.railway.app/api/admin-responses?report_id=${parseInt(reportId)}`, {
+        const res = await fetch('https://majitrack-backend-production.up.railway.app/api/admin-responses', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             ...(token && { Authorization: `Bearer ${token}` })
           },
-          body: JSON.stringify({ comments: comment, status })
+          body: JSON.stringify({
+            report_id,
+            user_id,
+            water_source_id,
+            comments,
+            status
+          })
         });
 
         const result = await res.json();
@@ -131,4 +148,5 @@
   </script>
 </body>
 </html>
+
 
