@@ -296,7 +296,8 @@
       `;
 
       resolveBtn.onclick = () => {
-        window.location.href = `adminResponses.html?reportId=${report.report_id}`;
+        window.location.href = `adminResponses.html?reportId=${report.report_id}&userId=${report.user_id}&waterSourceId=${report.water_source_id}`;
+
       };
 
       modal.style.display = 'block';
