@@ -1,148 +1,115 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Respond to Report | Majitrack</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <link rel="stylesheet" href="css/style.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <meta charset="UTF-8">
+  <title>Admin Response | Majitrack</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
-      font-family: 'Poppins', sans-serif;
-      background-color: #f0f4f8;
-      padding: 2rem;
-    }
-
-    .container {
-      max-width: 600px;
-      background-color: white;
-      margin: auto;
-      padding: 2rem;
-      border-radius: 10px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      font-family: Arial, sans-serif;
+      margin: 2rem;
+      background-color: #f2f2f2;
     }
 
     h2 {
       text-align: center;
-      color: #023e8a;
+      margin-bottom: 1rem;
     }
 
-    label {
-      font-weight: 600;
-      display: block;
-      margin-top: 1rem;
+    .response-form {
+      background-color: #fff;
+      padding: 2rem;
+      border-radius: 10px;
+      max-width: 600px;
+      margin: auto;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
 
-    textarea, select {
+    textarea {
       width: 100%;
-      padding: 10px;
-      margin-top: 0.3rem;
-      border-radius: 5px;
+      height: 120px;
+      padding: 0.75rem;
+      margin-bottom: 1rem;
       border: 1px solid #ccc;
+      border-radius: 8px;
+      resize: vertical;
+      font-size: 1rem;
     }
 
     button {
-      margin-top: 1.5rem;
-      width: 100%;
-      background-color: #0077b6;
+      background-color: #28a745;
       color: white;
-      padding: 0.8rem;
       border: none;
-      border-radius: 5px;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
       cursor: pointer;
-      font-weight: bold;
+      border-radius: 8px;
     }
 
     button:hover {
-      background-color: #0096c7;
+      background-color: #218838;
     }
 
-    .msg {
-      margin-top: 1rem;
-      font-weight: bold;
-      text-align: center;
+    .top-bar {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 1rem;
+    }
+
+    .top-bar button {
+      background-color: #dc3545;
+      margin-left: auto;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2><i class="fas fa-reply"></i> Respond to Report</h2>
+  <div class="top-bar">
+    <button onclick="window.location.href='index.html'">Logout</button>
+  </div>
 
-    <form id="responseForm">
-      <input type="hidden" id="report_id" />
-      <input type="hidden" id="user_id" />
-      <input type="hidden" id="water_source_id" />
-
-      <label for="comment">Your Response</label>
-      <textarea id="comment" rows="5" placeholder="Enter your comments..." required></textarea>
-
-      <label for="status">Status</label>
-      <select id="status" required>
-        <option value="resolved" selected>Resolved</option>
-      </select>
-
-      <button type="submit">Send Response</button>
-    </form>
-
-    <div id="msg" class="msg"></div>
+  <h2>Respond to Report</h2>
+  <div class="response-form">
+    <textarea id="comments" placeholder="Enter your response..."></textarea>
+    <button id="submitResponse">Send Response</button>
   </div>
 
   <script>
-    const token = localStorage.getItem('token');
-    const queryParams = new URLSearchParams(window.location.search);
+    const urlParams = new URLSearchParams(window.location.search);
+    const reportId = parseInt(urlParams.get('reportId'));
+    const userId = parseInt(urlParams.get('userId'));
 
-    const report_id = queryParams.get("report_id");
-    const user_id = queryParams.get("user_id");
-    const water_source_id = queryParams.get("water_source_id");
+    if (!reportId || !userId) {
+      alert('❌ Missing report or user ID in the URL.');
+      window.location.href = 'reports.html';
+    }
 
-    // Set hidden inputs
-    document.getElementById('report_id').value = report_id;
-    document.getElementById('user_id').value = user_id;
-    document.getElementById('water_source_id').value = water_source_id;
+    document.getElementById('submitResponse').addEventListener('click', async () => {
+      const comments = document.getElementById('comments').value.trim();
+      const status = 'resolved'; // Always resolved for admin
 
-    const form = document.getElementById('responseForm');
-
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      const comments = document.getElementById('comment').value.trim();
-      const status = document.getElementById('status').value;
-
-      const msgDiv = document.getElementById('msg');
-      msgDiv.innerText = '';
-
-      if (!report_id || !user_id || !water_source_id) {
-        msgDiv.innerText = '❌ Missing report/user/water source ID.';
+      if (!comments) {
+        alert('❌ Please enter a response comment.');
         return;
       }
 
       try {
-        const res = await fetch('https://majitrack-backend-production.up.railway.app/api/admin-responses', {
+        const res = await fetch('https://majitrack-backend.onrender.com/api/admin-responses', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(token && { Authorization: `Bearer ${token}` })
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            report_id,
-            user_id,
-            water_source_id,
+            report_id: reportId,
             comments,
             status
           })
         });
 
-        const result = await res.json();
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to send response');
 
-        if (res.ok) {
-          msgDiv.innerText = '✅ Response submitted successfully!';
-          form.reset();
-        } else {
-          msgDiv.innerText = result.message || '❌ Failed to send response.';
-        }
+        alert('✅ Response sent successfully!');
+        window.location.href = 'viewResponses.html'; // redirect after success
       } catch (err) {
-        console.error('Error submitting response:', err);
-        msgDiv.innerText = '⚠️ Network or server error.';
+        alert(`❌ ${err.message}`);
       }
     });
   </script>
