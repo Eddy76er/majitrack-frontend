@@ -165,8 +165,8 @@
           <td>${source.water_source_type}</td>
           <td>${source.location}</td>
           <td class="actions">
-            <button class="edit-btn" onclick="editSource(${source.water_source_id})"><i class="fas fa-edit"></i></button>
-            <button class="delete-btn" onclick="deleteSource(${source.water_source_id})"><i class="fas fa-trash"></i></button>
+            <button class="edit-btn" onclick="editSource('${source.water_source_id}')"><i class="fas fa-edit"></i></button>
+            <button class="delete-btn" onclick="deleteSource('${source.water_source_id}')"><i class="fas fa-trash"></i></button>
           </td>
         `;
         tableBody.appendChild(row);
@@ -196,7 +196,7 @@
     }
 
     function editSource(id) {
-      alert('🔧 Edit functionality will be implemented later.');
+      alert(`🔧 Edit functionality for source ID ${id} will be implemented later.`);
     }
 
     filterType.addEventListener('change', () => renderTable(sources));

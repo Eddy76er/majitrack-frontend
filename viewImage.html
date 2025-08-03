@@ -57,6 +57,12 @@
     const span = document.getElementById("imageUrlSpan");
     const link = document.getElementById("openImageLink");
 
+    // Optional: capture report UUID if passed for logging/future use
+    const reportId = params.get("reportId"); // UUID
+    if (reportId) {
+      console.log("Viewing image for report ID:", reportId);
+    }
+
     if (imageUrlParam) {
       const decodedUrl = decodeURIComponent(imageUrlParam);
       imageTag.src = decodedUrl;

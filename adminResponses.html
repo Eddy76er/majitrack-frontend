@@ -77,15 +77,16 @@
     const urlParams = new URLSearchParams(window.location.search);
     const reportId = urlParams.get('reportId');
     const userId = urlParams.get('userId');
+    const waterSourceId = urlParams.get('waterSourceId');
 
-    if (!reportId || !userId) {
-      alert('❌ Missing report or user ID in the URL.');
+    if (!reportId || !userId || !waterSourceId) {
+      alert('❌ Missing required parameters (reportId, userId, or waterSourceId).');
       window.location.href = 'reports.html';
     }
 
     document.getElementById('submitResponse').addEventListener('click', async () => {
       const comments = document.getElementById('comments').value.trim();
-      const status = 'resolved'; // Always resolved for admin
+      const status = 'resolved';
 
       if (!comments) {
         alert('❌ Please enter a response comment.');
@@ -94,21 +95,22 @@
 
       try {
         const res = await fetch('https://majitrack-backend-production.up.railway.app/api/admin-responses', {
-        
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             report_id: reportId,
+            user_id: userId,
+            water_source_id: waterSourceId,
             comments,
             status
           })
         });
 
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Failed to send response');
+        if (!res.ok) throw new Error(data.message || 'Failed to send response');
 
         alert('✅ Response sent successfully!');
-        window.location.href = 'viewResponses.html'; // redirect after success
+        window.location.href = 'viewResponses.html';
       } catch (err) {
         alert(`❌ ${err.message}`);
       }

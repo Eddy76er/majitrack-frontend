@@ -7,6 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
+    /* [Styles remain unchanged] */
     body {
       font-family: 'Segoe UI', sans-serif;
       background-color: #f2f6fc;
@@ -176,7 +177,7 @@
       .filter-container {
         flex-direction: column;
       }
-      
+
       .modal-content {
         width: 95%;
         margin: 20% auto;
@@ -196,12 +197,12 @@
         <option value="resolved">Resolved</option>
       </select>
     </div>
-    
+
     <div class="filter-group">
       <label for="fromDate">From:</label>
       <input type="date" id="fromDate">
     </div>
-    
+
     <div class="filter-group">
       <label for="toDate">To:</label>
       <input type="date" id="toDate">
@@ -244,9 +245,7 @@
     const fetchReports = async () => {
       try {
         const res = await fetch('https://majitrack-backend-production.up.railway.app/api/reports', {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+          headers: { Authorization: `Bearer ${token}` }
         });
         const data = await res.json();
         allReports = data;
@@ -278,10 +277,10 @@
       const details = document.getElementById('reportDetails');
       const resolveBtn = document.getElementById('resolveBtn');
 
-     const imageUrl = report.image_path ? report.image_path : null;
-     const viewImageBtn = imageUrl
-     ? `<a class="view-image-btn" target="_blank" href="viewImage.html?src=${encodeURIComponent(imageUrl)}">View Full Image</a>`
-     : 'No image';
+      const imageUrl = report.image_path ? report.image_path : null;
+      const viewImageBtn = imageUrl
+        ? `<a class="view-image-btn" target="_blank" href="viewImage.html?src=${encodeURIComponent(imageUrl)}">View Full Image</a>`
+        : 'No image';
 
       details.innerHTML = `
         <p><strong>User ID:</strong> ${report.user_id}</p>
@@ -295,10 +294,10 @@
         <p><strong>Image:</strong> ${viewImageBtn}</p>
       `;
 
+      // Pass UUIDs in URL
       resolveBtn.onclick = () => {
-      window.location.href = `adminResponses.html?reportId=${report.report_id}&userId=${report.user_id}`;
-     };
-
+        window.location.href = `adminResponses.html?reportId=${encodeURIComponent(report.report_id)}&userId=${encodeURIComponent(report.user_id)}`;
+      };
 
       modal.style.display = 'block';
     };

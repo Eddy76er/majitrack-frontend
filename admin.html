@@ -109,9 +109,21 @@
   </div>
 
   <script>
+    // 👤 UUID-aware logout
     function logout() {
-      localStorage.clear();
+      localStorage.removeItem('token');
+      localStorage.removeItem('user_id'); // UUID-based user ID
+      localStorage.removeItem('role');
+      localStorage.removeItem('name');
+      localStorage.removeItem('phone_number');
       window.location.href = 'index.html';
+    }
+
+    // ✅ Optional UUID debug check
+    const userId = localStorage.getItem('user_id');
+    if (!userId || userId.length !== 36) {
+      console.warn('⚠️ Invalid or missing UUID. Redirecting to login.');
+      logout(); // Force logout if UUID is missing or malformed
     }
   </script>
 </body>
