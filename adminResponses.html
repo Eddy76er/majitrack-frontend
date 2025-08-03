@@ -75,8 +75,8 @@
 
   <script>
     const urlParams = new URLSearchParams(window.location.search);
-    const reportId = parseInt(urlParams.get('reportId'));
-    const userId = parseInt(urlParams.get('userId'));
+    const reportId = urlParams.get('reportId');
+    const userId = urlParams.get('userId');
 
     if (!reportId || !userId) {
       alert('❌ Missing report or user ID in the URL.');
