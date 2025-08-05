@@ -123,12 +123,12 @@
 
   <script>
     const token = localStorage.getItem('token');
-    const userId = localStorage.getItem('user_id'); // now UUID
+    const userId = localStorage.getItem('user_id'); // UUID
     const name = localStorage.getItem('name');
     const phone = localStorage.getItem('phone_number');
 
-    if (!token || !userId) {
-      alert("Session expired. Please log in again.");
+    if (!token || !userId || userId.length !== 36) {
+      alert("Session expired or invalid UUID. Please log in again.");
       window.location.href = "login.html";
     }
 

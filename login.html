@@ -38,25 +38,27 @@
         const data = await res.json();
 
         if (res.ok && data.token) {
-          // ✅ Store data, now using UUID for user_id
+          // ✅ Store user data with UUID-based user_id
           localStorage.setItem('token', data.token);
-          localStorage.setItem('user_id', data.user.user_id); // now UUID
+          localStorage.setItem('user_id', data.user.user_id); // UUID
           localStorage.setItem('role', data.user.role);
           localStorage.setItem('name', data.user.name);
           localStorage.setItem('phone_number', data.user.phone_number);
 
-          // ✅ Redirect based on role
+          // ✅ Redirect based on user role
           if (data.user.role === 'admin') {
             window.location.href = 'admin.html';
           } else {
             window.location.href = 'resident.html';
           }
         } else {
-          document.getElementById('loginMsg').innerText = data.message || '❌ Invalid phone number or password.';
+          document.getElementById('loginMsg').innerText =
+            data.message || '❌ Invalid phone number or password.';
         }
       } catch (err) {
         console.error(err);
-        document.getElementById('loginMsg').innerText = '⚠️ Error logging in. Please try again.';
+        document.getElementById('loginMsg').innerText =
+          '⚠️ Error logging in. Please try again.';
       }
     });
   </script>

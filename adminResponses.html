@@ -79,8 +79,15 @@
     const userId = urlParams.get('userId');
     const waterSourceId = urlParams.get('waterSourceId');
 
-    if (!reportId || !userId || !waterSourceId) {
-      alert('❌ Missing required parameters (reportId, userId, or waterSourceId).');
+    // UUID v4 validation function
+    function isValidUUID(uuid) {
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      return uuidRegex.test(uuid);
+    }
+
+    // Check required UUID params
+    if (!isValidUUID(reportId) || !isValidUUID(userId) || !isValidUUID(waterSourceId)) {
+      alert('❌ Invalid or missing UUID parameters (reportId, userId, or waterSourceId).');
       window.location.href = 'reports.html';
     }
 

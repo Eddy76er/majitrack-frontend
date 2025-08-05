@@ -30,8 +30,8 @@
       e.preventDefault();
 
       const user = {
-        name: document.getElementById('name').value,
-        phone_number: document.getElementById('phoneNumber').value,
+        name: document.getElementById('name').value.trim(),
+        phone_number: document.getElementById('phoneNumber').value.trim(),
         password: document.getElementById('password').value,
         role: document.getElementById('role').value
       };
@@ -48,7 +48,7 @@
         if (res.ok && data.token) {
           // ✅ Save UUID and user details in localStorage
           localStorage.setItem('token', data.token);
-          localStorage.setItem('user_id', data.user.user_id); // Now UUID
+          localStorage.setItem('user_id', data.user.user_id); // UUID from backend
           localStorage.setItem('role', data.user.role);
           localStorage.setItem('name', data.user.name);
           localStorage.setItem('phone_number', data.user.phone_number);

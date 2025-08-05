@@ -51,16 +51,18 @@
   </div>
 
   <script>
+    // Extract query parameters from the URL
     const params = new URLSearchParams(window.location.search);
-    const imageUrlParam = params.get("src") || params.get("image"); // Support both ?src and ?image
+    const imageUrlParam = params.get("src") || params.get("image"); // Accepts ?src or ?image
+    const reportId = params.get("reportId"); // UUID for reference
+
     const imageTag = document.getElementById("reportImage");
     const span = document.getElementById("imageUrlSpan");
     const link = document.getElementById("openImageLink");
 
-    // Optional: capture report UUID if passed for logging/future use
-    const reportId = params.get("reportId"); // UUID
+    // Optional: Log UUID if passed
     if (reportId) {
-      console.log("Viewing image for report ID:", reportId);
+      console.log("🆔 Viewing image for report ID (UUID):", reportId);
     }
 
     if (imageUrlParam) {
@@ -69,10 +71,11 @@
       span.textContent = decodedUrl;
       link.href = decodedUrl;
     } else {
-      imageTag.style.display = "none"; // Hide broken image icon
+      imageTag.style.display = "none";
+      link.style.display = "none";
       span.textContent = "❌ No image URL found in request.";
-      link.style.display = "none"; // Hide the link if no image
     }
   </script>
 </body>
 </html>
+
