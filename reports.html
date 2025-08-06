@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
-    body {
+     body {
       font-family: 'Segoe UI', sans-serif;
       background-color: #f2f6fc;
       padding: 2rem;
@@ -213,7 +213,6 @@
       <tr>
         <th>User ID</th>
         <th>Name</th>
-        <th>Location</th>
         <th>Water Source Type</th>
         <th>Status</th>
         <th>Date</th>
@@ -259,11 +258,10 @@
       reports.forEach(report => {
         const row = document.createElement('tr');
         row.innerHTML = `
-          <td>${report.user_id}</td>
+          <td>${report.user_id || 'N/A'}</td>
           <td>${report.name || 'N/A'}</td>
-          <td>${report.location}</td>
-          <td>${report.water_source_type}</td>
-          <td>${report.status}</td>
+          <td>${report.water_source_type || 'N/A'}</td>
+          <td>${report.status || 'N/A'}</td>
           <td>${new Date(report.date_created).toLocaleDateString()}</td>
           <td><button class="view-btn" onclick='showModal(${JSON.stringify(report)})'>View</button></td>
         `;
@@ -282,18 +280,16 @@
         : 'No image';
 
       details.innerHTML = `
-        <p><strong>User ID:</strong> ${report.user_id}</p>
+        <p><strong>User ID:</strong> ${report.user_id || 'N/A'}</p>
         <p><strong>Name:</strong> ${report.name || 'N/A'}</p>
         <p><strong>Phone Number:</strong> ${report.phone_number || 'N/A'}</p>
-        <p><strong>Location:</strong> ${report.location}</p>
-        <p><strong>Water Source Type:</strong> ${report.water_source_type}</p>
-        <p><strong>Description:</strong> ${report.description}</p>
-        <p><strong>Status:</strong> ${report.status}</p>
+        <p><strong>Water Source Type:</strong> ${report.water_source_type || 'N/A'}</p>
+        <p><strong>Description:</strong> ${report.description || 'N/A'}</p>
+        <p><strong>Status:</strong> ${report.status || 'N/A'}</p>
         <p><strong>Date:</strong> ${new Date(report.date_created).toLocaleString()}</p>
         <p><strong>Image:</strong> ${viewImageBtn}</p>
       `;
 
-      // ✅ UUIDs passed in query string
       resolveBtn.onclick = () => {
         window.location.href = `adminResponses.html?reportId=${encodeURIComponent(report.report_id)}&userId=${encodeURIComponent(report.user_id)}&waterSourceId=${encodeURIComponent(report.water_source_id)}`;
       };
