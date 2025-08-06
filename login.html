@@ -40,7 +40,7 @@
         if (res.ok && data.token) {
           // ✅ Store user data with UUID-based user_id
           localStorage.setItem('token', data.token);
-          localStorage.setItem('user_id', data.user.user_id); // UUID
+          localStorage.setItem('user_id', data.user.id); // fixed: changed from user.user_id
           localStorage.setItem('role', data.user.role);
           localStorage.setItem('name', data.user.name);
           localStorage.setItem('phone_number', data.user.phone_number);
