@@ -127,7 +127,7 @@
 
     async function fetchWaterSources() {
       try {
-        const res = await fetch('https://majitrack-backend.onrender.com/api/water-sources', {
+        const res = await fetch('https://majitrack-backend-production.up.railway.app/api/water-sources', {
           headers: { Authorization: `Bearer ${token}` }
         });
         sources = await res.json();
