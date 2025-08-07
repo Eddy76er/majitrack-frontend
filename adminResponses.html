@@ -58,7 +58,7 @@
 
     .top-bar button {
       background-color: #dc3545;
-      margin-left: auto;
+      color: white;
     }
   </style>
 </head>
@@ -76,18 +76,16 @@
   <script>
     const urlParams = new URLSearchParams(window.location.search);
     const reportId = urlParams.get('reportId');
-    const userId = urlParams.get('userId');
-    const waterSourceId = urlParams.get('waterSourceId');
 
-    // UUID v4 validation function
+    // UUID v4 validation
     function isValidUUID(uuid) {
       const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
       return uuidRegex.test(uuid);
     }
 
-    // Check required UUID params
-    if (!isValidUUID(reportId) || !isValidUUID(userId) || !isValidUUID(waterSourceId)) {
-      alert('❌ Invalid or missing UUID parameters (reportId, userId, or waterSourceId).');
+    // Validate reportId
+    if (!isValidUUID(reportId)) {
+      alert('❌ Invalid or missing reportId parameter.');
       window.location.href = 'reports.html';
     }
 
@@ -106,8 +104,6 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             report_id: reportId,
-            user_id: userId,
-            water_source_id: waterSourceId,
             comments,
             status
           })
@@ -119,7 +115,7 @@
         alert('✅ Response sent successfully!');
         window.location.href = 'viewResponses.html';
       } catch (err) {
-        alert(`${err.message}`);
+        alert(`❌ ${err.message}`);
       }
     });
   </script>
