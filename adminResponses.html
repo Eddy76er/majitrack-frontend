@@ -72,52 +72,50 @@
     <textarea id="comments" placeholder="Enter your response..."></textarea>
     <button id="submitResponse">Send Response</button>
   </div>
+<script>
+  const urlParams = new URLSearchParams(window.location.search);
+  const reportId = urlParams.get('reportId');
 
-  <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const reportId = urlParams.get('reportId');
+  function isValidUUID(uuid) {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(uuid);
+  }
 
-    // UUID v4 validation
-    function isValidUUID(uuid) {
-      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-      return uuidRegex.test(uuid);
+  if (!isValidUUID(reportId)) {
+    alert('❌ Invalid or missing reportId parameter.');
+    window.location.href = 'reports.html';
+  }
+
+  document.getElementById('submitResponse').addEventListener('click', async () => {
+    const rawComments = document.getElementById('comments').value;
+    const status = 'resolved';
+
+    if (!rawComments.trim()) {
+      alert('❌ Please enter a response comment.');
+      return;
     }
 
-    // Validate reportId
-    if (!isValidUUID(reportId)) {
-      alert('❌ Invalid or missing reportId parameter.');
-      window.location.href = 'reports.html';
+    try {
+      const res = await fetch('https://majitrack-backend-production.up.railway.app/api/admin-responses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          report_id: reportId,
+          comments: rawComments, // send exactly what admin typed
+          status
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Failed to send response');
+
+      alert('✅ Response sent successfully!');
+      window.location.href = 'viewResponses.html';
+    } catch (err) {
+      alert(`❌ ${err.message}`);
     }
+  });
+</script>
 
-    document.getElementById('submitResponse').addEventListener('click', async () => {
-      const comments = document.getElementById('comments').value.trim();
-      const status = 'resolved';
-
-      if (!comments) {
-        alert('❌ Please enter a response comment.');
-        return;
-      }
-
-      try {
-        const res = await fetch('https://majitrack-backend-production.up.railway.app/api/admin-responses', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            report_id: reportId,
-            comments,
-            status
-          })
-        });
-
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || 'Failed to send response');
-
-        alert('✅ Response sent successfully!');
-        window.location.href = 'viewResponses.html';
-      } catch (err) {
-        alert(`❌ ${err.message}`);
-      }
-    });
-  </script>
 </body>
 </html>
