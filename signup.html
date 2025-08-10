@@ -11,7 +11,7 @@
     <h2>📝 Create Account</h2>
     <form id="signupForm">
       <input type="text" id="name" placeholder="Full Name" required />
-      <input type="text" id="phoneNumber" placeholder="Phone Number" required />
+      <input type="text" id="phone_number" placeholder="Phone Number" required />
       <input type="password" id="password" placeholder="Password" required />
       <select id="role" required>
         <option value="">Select Role</option>
@@ -20,7 +20,7 @@
       </select>
       <button type="submit">Register</button>
     </form>
-    <div id="signupMsg"></div>
+    <div id="signupMsg" style="margin-top: 1rem; font-weight: bold;"></div>
   </div>
 
   <script>
@@ -31,7 +31,7 @@
 
       const user = {
         name: document.getElementById('name').value.trim(),
-        phone_number: document.getElementById('phoneNumber').value.trim(),
+        phone_number: document.getElementById('phone_number').value.trim(),
         password: document.getElementById('password').value,
         role: document.getElementById('role').value
       };
@@ -45,14 +45,14 @@
 
         const data = await res.json();
 
-        if (res.ok && data.token) {
-          // ✅ Save UUID and user details in localStorage
-          localStorage.setItem('token', data.token);
-          localStorage.setItem('user_id', data.user.user_id); // UUID from backend
+        if (res.ok) {
+          // ✅ Save user details in localStorage
+          localStorage.setItem('user_id', data.user.user_id);
           localStorage.setItem('role', data.user.role);
           localStorage.setItem('name', data.user.name);
           localStorage.setItem('phone_number', data.user.phone_number);
 
+          document.getElementById('signupMsg').style.color = 'green';
           document.getElementById('signupMsg').innerText = '✅ Signup successful! Redirecting...';
 
           // ✅ Redirect based on role
@@ -64,11 +64,13 @@
             }
           }, 1500);
         } else {
+          document.getElementById('signupMsg').style.color = 'red';
           document.getElementById('signupMsg').innerText = data.message || '❌ Signup failed.';
         }
 
       } catch (err) {
         console.error(err);
+        document.getElementById('signupMsg').style.color = 'orange';
         document.getElementById('signupMsg').innerText = '⚠️ Error submitting form.';
       }
     });
