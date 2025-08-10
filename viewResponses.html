@@ -29,14 +29,24 @@
     }
     .filters {
       display: flex;
+      flex-wrap: wrap;
       gap: 1rem;
       justify-content: center;
       margin-bottom: 1rem;
     }
-    select, input[type="date"] {
+    select, input[type="date"], .filters button {
       padding: 0.5rem;
       border-radius: 5px;
       border: 1px solid #ccc;
+    }
+    .filters button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .filters button:hover {
+      background-color: #0056b3;
     }
     table {
       width: 100%;
@@ -59,6 +69,7 @@
       text-align: center;
       margin-top: 2rem;
       font-style: italic;
+      color: #555;
     }
   </style>
 </head>
@@ -99,7 +110,7 @@
 
   <script>
     const API_BASE = "https://majitrack-backend-production.up.railway.app/api";
-    const adminId = localStorage.getItem("user_id"); // stored on login
+    const adminId = localStorage.getItem("user_id"); // stored during login
 
     async function fetchResponses() {
       if (!adminId) {
@@ -113,8 +124,8 @@
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || "Failed to fetch responses");
 
-        window.allResponses = data;
-        renderTable(data);
+        window.allResponses = Array.isArray(data) ? data : [];
+        renderTable(window.allResponses);
       } catch (err) {
         alert(`❌ ${err.message}`);
       }
@@ -137,19 +148,19 @@
           <td>${resp.phone_number || "N/A"}</td>
           <td>${resp.water_source_type || "N/A"}</td>
           <td>${resp.comments || ""}</td>
-          <td>${new Date(resp.date_sent).toLocaleString()}</td>
+          <td>${resp.date_sent ? new Date(resp.date_sent).toLocaleString() : "N/A"}</td>
         `;
         tbody.appendChild(tr);
       });
     }
 
     function applyFilters() {
-      let filtered = [...window.allResponses];
+      let filtered = [...(window.allResponses || [])];
       const date = document.getElementById("filterDate").value;
       const type = document.getElementById("filterType").value.toLowerCase();
 
       if (date) {
-        filtered = filtered.filter(r => r.date_sent.startsWith(date));
+        filtered = filtered.filter(r => r.date_sent && r.date_sent.startsWith(date));
       }
       if (type) {
         filtered = filtered.filter(r => r.water_source_type && r.water_source_type.toLowerCase() === type);

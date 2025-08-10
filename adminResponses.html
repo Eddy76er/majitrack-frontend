@@ -64,7 +64,7 @@
 </head>
 <body>
   <div class="top-bar">
-    <button onclick="window.location.href='index.html'">Logout</button>
+    <button onclick="logout()">Logout</button>
   </div>
 
   <h2>Respond to Report</h2>
@@ -72,50 +72,67 @@
     <textarea id="comments" placeholder="Enter your response..."></textarea>
     <button id="submitResponse">Send Response</button>
   </div>
+
   <script>
-  const urlParams = new URLSearchParams(window.location.search);
-  const reportId = urlParams.get('reportId');
+    // Get reportId from query string
+    const urlParams = new URLSearchParams(window.location.search);
+    const reportId = urlParams.get('reportId');
 
-  function isValidUUID(uuid) {
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    return uuidRegex.test(uuid);
-  }
-
-  if (!isValidUUID(reportId)) {
-    alert('❌ Invalid or missing reportId parameter.');
-    window.location.href = 'reports.html';
-  }
-
-  document.getElementById('submitResponse').addEventListener('click', async () => {
-    const rawComments = document.getElementById('comments').value;
-    const status = 'resolved';
-
-    if (!rawComments.trim()) {
-      alert('❌ Please enter a response comment.');
-      return;
+    // Validate UUID format
+    function isValidUUID(uuid) {
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      return uuidRegex.test(uuid);
     }
 
-    try {
-      const res = await fetch('https://majitrack-backend-production.up.railway.app/api/admin-responses', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          report_id: reportId,
-          comments: rawComments, // send exactly what admin typed
-          status
-        })
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Failed to send response');
-
-      alert('✅ Response sent successfully!');
-      window.location.href = 'viewResponses.html';
-    } catch (err) {
-      alert(`❌ ${err.message}`);
+    if (!isValidUUID(reportId)) {
+      alert('❌ Invalid or missing reportId parameter.');
+      window.location.href = 'reports.html';
     }
-  });
+
+    // Retrieve logged-in admin's ID from localStorage/session
+    const adminUserId = localStorage.getItem('admin_user_id');
+    if (!adminUserId) {
+      alert('❌ No admin session found. Please log in again.');
+      window.location.href = 'adminLogin.html';
+    }
+
+    // Logout function
+    function logout() {
+      localStorage.removeItem('admin_user_id');
+      window.location.href = 'index.html';
+    }
+
+    document.getElementById('submitResponse').addEventListener('click', async () => {
+      const rawComments = document.getElementById('comments').value;
+      const status = 'resolved';
+
+      if (!rawComments.trim()) {
+        alert('❌ Please enter a response comment.');
+        return;
+      }
+
+      try {
+        const res = await fetch('https://majitrack-backend-production.up.railway.app/api/admin-responses', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include', // send cookies if your session is cookie-based
+          body: JSON.stringify({
+            report_id: reportId,
+            comments: rawComments,
+            status,
+            admin_user_id: adminUserId // auto-attached from session
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Failed to send response');
+
+        alert('✅ Response sent successfully!');
+        window.location.href = 'viewResponses.html';
+      } catch (err) {
+        alert(`❌ ${err.message}`);
+      }
+    });
   </script>
-
 </body>
 </html>
