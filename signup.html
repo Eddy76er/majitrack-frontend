@@ -46,32 +46,26 @@
         const data = await res.json();
 
         if (res.ok) {
-          // ✅ Save user details in localStorage
-          localStorage.setItem('user_id', data.user.user_id);
-          localStorage.setItem('role', data.user.role);
-          localStorage.setItem('name', data.user.name);
-          localStorage.setItem('phone_number', data.user.phone_number);
-
           document.getElementById('signupMsg').style.color = 'green';
-          document.getElementById('signupMsg').innerText = '✅ Signup successful! Redirecting...';
+          document.getElementById('signupMsg').innerText = 
+            '✅ Signup successful! Redirecting to login page...';
 
-          // ✅ Redirect based on role
+          // Redirect to index.html for login
           setTimeout(() => {
-            if (data.user.role === 'admin') {
-              window.location.href = 'admin.html';
-            } else {
-              window.location.href = 'resident.html';
-            }
+            window.location.href = 'index.html';
           }, 1500);
+
         } else {
           document.getElementById('signupMsg').style.color = 'red';
-          document.getElementById('signupMsg').innerText = data.message || '❌ Signup failed.';
+          document.getElementById('signupMsg').innerText = 
+            data.message || '❌ Signup failed.';
         }
 
       } catch (err) {
         console.error(err);
         document.getElementById('signupMsg').style.color = 'orange';
-        document.getElementById('signupMsg').innerText = '⚠️ Error submitting form.';
+        document.getElementById('signupMsg').innerText = 
+          '⚠️ Error submitting form. Please try again.';
       }
     });
   </script>

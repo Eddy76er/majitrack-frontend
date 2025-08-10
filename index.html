@@ -4,17 +4,39 @@
 <head>
   <meta charset="UTF-8">
   <title>Majitrack | Home</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="css/style.css">
+  <style>
+    #statusMsg {
+      margin-bottom: 1rem;
+      font-weight: bold;
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
     <h1>💧 Majitrack</h1>
     <p>Community Water Monitoring System</p>
+
+    <!-- Signup success message container -->
+    <div id="statusMsg"></div>
+
     <div class="buttons">
       <a href="signup.html" class="btn">Sign Up</a>
       <a href="login.html" class="btn">Login</a>
     </div>
   </div>
+
+  <script>
+    const statusMsg = document.getElementById('statusMsg');
+    const urlParams = new URLSearchParams(window.location.search);
+
+    // ✅ Show success message if redirected from signup
+    if (urlParams.get('signup') === 'success') {
+      statusMsg.style.color = 'green';
+      statusMsg.innerText = '✅ Signup successful! Please log in.';
+    }
+  </script>
 </body>
 </html>
-
