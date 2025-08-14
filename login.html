@@ -5,66 +5,135 @@
   <title>Login | Majitrack</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="css/style.css" />
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      max-width: 400px;
+      width: 100%;
+    }
+
+    h2 {
+      margin-bottom: 1.5rem;
+      color: #0077b6;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 0.75rem;
+      margin: 0.5rem 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+
+    button {
+      background: #0077b6;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: #005f86;
+    }
+
+    #loginMsg {
+      margin-top: 1rem;
+      font-weight: bold;
+      min-height: 1.5rem;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
     <h2>🔐 User Login</h2>
     <form id="loginForm">
-      <input type="text" id="phone_number" placeholder="Phone Number" required />
-      <input type="password" id="password" placeholder="Password" required />
+      <input 
+        type="text" 
+        id="phone_number" 
+        placeholder="Phone Number (07xxxxxxxx)" 
+        pattern="^07\d{8}$" 
+        title="Enter a valid phone number in format 07xxxxxxxx" 
+        required 
+      />
+      <input 
+        type="password" 
+        id="password" 
+        placeholder="Password" 
+        minlength="6" 
+        required 
+      />
       <button type="submit">Login</button>
     </form>
-    <div id="loginMsg" style="margin-top: 1rem; font-weight: bold;"></div>
+    <div id="loginMsg"></div>
   </div>
 
   <script>
     const form = document.getElementById('loginForm');
+    const loginMsg = document.getElementById('loginMsg');
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      const credentials = {
-        phone_number: document.getElementById('phone_number').value.trim(),
-        password: document.getElementById('password').value
-      };
+      // Normalize phone number format
+      let phone = document.getElementById('phone_number').value.trim();
+      const password = document.getElementById('password').value;
+
+      // Ensure local format "07xxxxxxxx"
+      if (!/^07\d{8}$/.test(phone)) {
+        loginMsg.style.color = 'red';
+        loginMsg.innerText = '❌ Please enter a valid phone number (07xxxxxxxx)';
+        return;
+      }
 
       try {
         const res = await fetch('https://majitrack-backend-production.up.railway.app/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(credentials)
+          body: JSON.stringify({ phone_number: phone, password })
         });
 
         const data = await res.json();
 
         if (res.ok) {
-          // ✅ Save user details in localStorage
-          localStorage.setItem('user_id', data.user.user_id);
+          // Save user details in localStorage
+          localStorage.setItem('user_id', data.user.id);
           localStorage.setItem('role', data.user.role);
           localStorage.setItem('name', data.user.name);
-          localStorage.setItem('phone_number', data.user.phone_number);
+          localStorage.setItem('phone_number', phone);
 
-          document.getElementById('loginMsg').style.color = 'green';
-          document.getElementById('loginMsg').innerText = '✅ Login successful! Redirecting...';
+          loginMsg.style.color = 'green';
+          loginMsg.innerText = '✅ Login successful! Redirecting...';
 
-          // ✅ Redirect based on role
+          // Redirect based on role
           setTimeout(() => {
-            if (data.user.role === 'admin') {
-              window.location.href = 'admin.html';
-            } else {
-              window.location.href = 'resident.html';
-            }
+            window.location.href = data.user.role === 'admin' ? 'admin.html' : 'resident.html';
           }, 1000);
+
         } else {
-          document.getElementById('loginMsg').style.color = 'red';
-          document.getElementById('loginMsg').innerText =
-            data.message || '❌ Invalid phone number or password.';
+          loginMsg.style.color = 'red';
+          loginMsg.innerText = data.message || '❌ Invalid phone number or password.';
         }
       } catch (err) {
         console.error(err);
-        document.getElementById('loginMsg').style.color = 'orange';
-        document.getElementById('loginMsg').innerText =
-          '⚠️ Error logging in. Please try again.';
+        loginMsg.style.color = 'orange';
+        loginMsg.innerText = '⚠️ Error logging in. Please try again.';
       }
     });
   </script>

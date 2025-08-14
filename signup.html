@@ -5,14 +5,58 @@
   <title>Sign Up | Majitrack</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="stylesheet" href="css/style.css" />
+  <style>
+    /* Basic responsive styling in case CSS fails to load */
+    body {
+      font-family: Arial, sans-serif;
+      background: #f7f9fb;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 400px;
+      margin: 50px auto;
+      background: #fff;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 0.8rem;
+      margin: 0.5rem 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 1rem;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      border: none;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    #signupMsg {
+      margin-top: 1rem;
+      font-weight: bold;
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
     <h2>📝 Create Account</h2>
-    <form id="signupForm">
+    <form id="signupForm" novalidate>
       <input type="text" id="name" placeholder="Full Name" required />
-      <input type="text" id="phone_number" placeholder="Phone Number" required />
-      <input type="password" id="password" placeholder="Password" required />
+      <input type="tel" id="phone_number" placeholder="07XXXXXXXX" pattern="^07\d{8}$" required />
+      <input type="password" id="password" placeholder="Password (min 6 chars)" minlength="6" required />
       <select id="role" required>
         <option value="">Select Role</option>
         <option value="resident">Resident</option>
@@ -20,21 +64,45 @@
       </select>
       <button type="submit">Register</button>
     </form>
-    <div id="signupMsg" style="margin-top: 1rem; font-weight: bold;"></div>
+    <div id="signupMsg"></div>
   </div>
 
   <script>
     const form = document.getElementById('signupForm');
+    const msgBox = document.getElementById('signupMsg');
+
+    // Simple Kenya phone format normalization
+    function normalizePhoneNumber(phone) {
+      let cleaned = phone.trim().replace(/\s+/g, '');
+      if (cleaned.startsWith('+254')) {
+        cleaned = '0' + cleaned.slice(4);
+      } else if (cleaned.startsWith('254')) {
+        cleaned = '0' + cleaned.slice(3);
+      }
+      return cleaned;
+    }
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      const user = {
-        name: document.getElementById('name').value.trim(),
-        phone_number: document.getElementById('phone_number').value.trim(),
-        password: document.getElementById('password').value,
-        role: document.getElementById('role').value
-      };
+      let name = document.getElementById('name').value.trim();
+      let phone_number = normalizePhoneNumber(document.getElementById('phone_number').value);
+      let password = document.getElementById('password').value;
+      let role = document.getElementById('role').value;
+
+      // Basic frontend validation
+      if (!/^07\d{8}$/.test(phone_number)) {
+        msgBox.style.color = 'red';
+        msgBox.innerText = '❌ Phone number must be in format 07XXXXXXXX.';
+        return;
+      }
+      if (password.length < 6) {
+        msgBox.style.color = 'red';
+        msgBox.innerText = '❌ Password must be at least 6 characters.';
+        return;
+      }
+
+      const user = { name, phone_number, password, role };
 
       try {
         const res = await fetch('https://majitrack-backend-production.up.railway.app/api/users/signup', {
@@ -46,26 +114,21 @@
         const data = await res.json();
 
         if (res.ok) {
-          document.getElementById('signupMsg').style.color = 'green';
-          document.getElementById('signupMsg').innerText = 
-            '✅ Signup successful! Redirecting to login page...';
+          msgBox.style.color = 'green';
+          msgBox.innerText = '✅ Signup successful! Redirecting to login page...';
+          form.reset();
 
-          // Redirect to index.html for login
           setTimeout(() => {
             window.location.href = 'index.html';
           }, 1500);
-
         } else {
-          document.getElementById('signupMsg').style.color = 'red';
-          document.getElementById('signupMsg').innerText = 
-            data.message || '❌ Signup failed.';
+          msgBox.style.color = 'red';
+          msgBox.innerText = data.message || '❌ Signup failed.';
         }
-
       } catch (err) {
-        console.error(err);
-        document.getElementById('signupMsg').style.color = 'orange';
-        document.getElementById('signupMsg').innerText = 
-          '⚠️ Error submitting form. Please try again.';
+        console.error('Signup error:', err);
+        msgBox.style.color = 'orange';
+        msgBox.innerText = '⚠️ Network or server error. Please try again.';
       }
     });
   </script>

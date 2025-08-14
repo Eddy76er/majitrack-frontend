@@ -6,11 +6,66 @@
   <title>Majitrack | Home</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="css/style.css">
+
   <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      max-width: 400px;
+      width: 100%;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 2rem;
+      color: #0077b6;
+    }
+
+    p {
+      margin-top: 0.5rem;
+      font-size: 1rem;
+      color: #555;
+    }
+
     #statusMsg {
-      margin-bottom: 1rem;
+      margin: 1rem 0;
       font-weight: bold;
       text-align: center;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      background: #0077b6;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      transition: background 0.3s ease;
+    }
+
+    .btn:hover {
+      background: #005f86;
     }
   </style>
 </head>
@@ -19,7 +74,7 @@
     <h1>💧 Majitrack</h1>
     <p>Community Water Monitoring System</p>
 
-    <!-- Signup success message container -->
+    <!-- Signup success message -->
     <div id="statusMsg"></div>
 
     <div class="buttons">
@@ -32,7 +87,7 @@
     const statusMsg = document.getElementById('statusMsg');
     const urlParams = new URLSearchParams(window.location.search);
 
-    // ✅ Show success message if redirected from signup
+    // Show signup success message
     if (urlParams.get('signup') === 'success') {
       statusMsg.style.color = 'green';
       statusMsg.innerText = '✅ Signup successful! Please log in.';
